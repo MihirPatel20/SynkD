@@ -18,7 +18,7 @@ const Navbar = () => {
             mr: 2
           }}
         >
-          Music App
+          SynkD
         </Typography>
         <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
           <SearchBar />

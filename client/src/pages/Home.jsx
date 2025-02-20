@@ -6,7 +6,7 @@ const Home = () => {
     <Container maxWidth="xl">
       <Box sx={{ textAlign: 'center', mt: 8 }}>
         <Typography variant="h4" gutterBottom>
-          Welcome to Music App
+          Welcome to SynkD
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Search for your favorite music videos above
