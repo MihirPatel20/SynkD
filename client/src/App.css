@@ -1,0 +1,105 @@
+:root {
+    --desktop-bg: #fafafa;
+    --section-bg: #ffffff;
+    --section-stroke: #e3e3e3;
+  
+    --labels: #c7c7c7;
+    --dark-labels: #686868;
+    --username: #686868;
+  
+    --active: #0064ff;
+    --online: #3dff7f;
+    --sky-blue: #28B2FF;
+    --light-blue: #D6EAFA;
+  
+    --darkest: #000000;
+  
+    --shadow: -4px 4px 32px rgba(150, 150, 150, 0.1);
+  }
+  
+  
+  .App {
+    overflow: hidden;
+    background-color: var(--desktop-bg);
+  }
+  
+  /* ::-webkit-scrollbar {
+    display: none;
+  } */
+  
+  
+  
+  .flex {
+    display: flex;
+  }
+  .center {
+    justify-content: center;
+    align-items: center;
+  }
+  .flexbox{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .card {
+    background-color: var(--section-bg);
+    border: 1px solid;
+    border-color: var(--section-stroke);
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    /* box-shadow: 0px 4px 35px rgba(150, 150, 150, 0.1); */
+    /* box-shadow: 0px 4px 35px black; */
+  }
+  
+  .button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    height: 35px;
+    
+    /* padding: 10px 40px; */
+  
+    border: none;
+    border-radius: 10px;
+    
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    background-color: var(--sky-blue);
+  }
+  .button-out {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    height: 35px;
+    
+    /* padding: 10px 40px; */
+  
+    border: none;
+    border-radius: 10px;
+    border: 1px solid;
+    border-color: var(--sky-blue);
+    
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--sky-blue);
+    background-color: transparent;
+  }
+  
+  .button:disabled {
+    background-color: silver;
+    pointer-events: none;
+  }
+  
+  
+  
+  .hl {
+    background-color: blue;
+  }
+  
+  
+  /* Css for Link */
+  /* style={{textDecoration: "none", color:"inherit"}} */
