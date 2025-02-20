@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Typography, Box } from "@mui/material";
 import VideoGrid from "../components/video/VideoGrid";
-import { fetchVideos } from "../services/api/youtube";
+import { fetchVideos } from "../services/youtube/youtubeApi.js";
 
 const Home = () => {
   const [videos, setVideos] = useState([]);

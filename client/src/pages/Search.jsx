@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Container, Typography, Alert } from '@mui/material';
 import VideoGrid from '../components/video/VideoGrid';
-import { fetchVideos } from '../services/api/youtube';
+import { fetchVideos } from '../services/youtube/youtubeApi.js';
 
 const Search = () => {
   const [searchParams] = useSearchParams();

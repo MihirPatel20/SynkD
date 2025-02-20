@@ -16,6 +16,8 @@
     "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.4",
     "axios": "^1.7.9",
+    "google-auth-library": "^9.15.1",
+    "googleapis": "^144.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.5"

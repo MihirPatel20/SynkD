@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Container, Grid, Typography, Box } from '@mui/material';
 import MusicPlayer from '../components/video/MusicPlayer';
 import VideoList from '../components/video/VideoList';
-import { fetchVideos } from '../services/api/youtube';
+import { fetchVideos } from '../services/youtube/youtubeApi.js';
 
 const Watch = () => {
   const { videoId } = useParams();
