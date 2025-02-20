@@ -18,6 +18,6 @@ export const fetchVideos = async (query) => {
     return response.data.items;
   } catch (error) {
     console.error("Error fetching videos:", error.response?.data || error.message);
-    return []; // Return empty array instead of throwing
+    throw error;
   }
 };
