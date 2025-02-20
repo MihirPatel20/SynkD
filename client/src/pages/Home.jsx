@@ -1,16 +1,35 @@
-import React from 'react';
-import { Container, Typography, Box } from '@mui/material';
+import React, { useState, useEffect } from "react";
+import { Container, Typography, Box } from "@mui/material";
+import VideoGrid from "../components/video/VideoGrid";
+import { fetchVideos } from "../services/api/youtube";
 
 const Home = () => {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadVideos = async () => {
+      try {
+        const results = await fetchVideos("music"); // Fetch recommended music videos
+        setVideos(results);
+      } catch (error) {
+        console.error("Error fetching recommended videos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadVideos();
+  }, []);
+
   return (
     <Container maxWidth="xl">
-      <Box sx={{ textAlign: 'center', mt: 8 }}>
-        <Typography variant="h4" gutterBottom>
-          Welcome to SynkD
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Search for your favorite music videos above
-        </Typography>
+      <Box sx={{ textAlign: "center" }}>
+        {loading ? (
+          <Typography>Loading...</Typography>
+        ) : (
+          <VideoGrid videos={videos} />
+        )}
       </Box>
     </Container>
   );
