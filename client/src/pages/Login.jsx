@@ -1,34 +1,53 @@
 // src/pages/Login.jsx
 import React from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { getAuthUrl } from '../services/authService';
+import { Navigate } from 'react-router-dom';
+import { Box, Button, Typography, Container } from '@mui/material';
+import { useAuth } from '../context/AuthContext';
+import { signIn } from '../services/authService';
 
 const Login = () => {
-  const handleLogin = () => {
-    window.location.href = getAuthUrl();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
+
+  const handleLogin = async () => {
+    try {
+      await signIn();
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="80vh"
-      gap={3}
-    >
-      <Typography variant="h4">
-        Login to access your YouTube playlists
-      </Typography>
-      <Button 
-        variant="contained" 
-        color="error"
-        onClick={handleLogin}
-        size="large"
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 3,
+        }}
       >
-        Sign in with Google
-      </Button>
-    </Box>
+        <Typography component="h1" variant="h4">
+          Welcome to Music App
+        </Typography>
+        <Typography variant="body1" textAlign="center">
+          Please sign in with your Google account to continue
+        </Typography>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={handleLogin}
+          sx={{ mt: 2 }}
+        >
+          Sign in with Google
+        </Button>
+      </Box>
+    </Container>
   );
 };
 

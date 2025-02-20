@@ -1,40 +1,52 @@
-// src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { loadGoogleApi, getAccessToken, signOut } from '../services/authService';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage for existing session
-    const savedUser = localStorage.getItem('yt_user');
-    const savedTokens = localStorage.getItem('yt_tokens');
-    
-    if (savedUser && savedTokens) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    const initializeAuth = async () => {
+      try {
+        await loadGoogleApi();
+        const token = getAccessToken();
+        setIsAuthenticated(!!token);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
-  const login = (userData, tokens) => {
-    setUser(userData);
-    localStorage.setItem('yt_user', JSON.stringify(userData));
-    localStorage.setItem('yt_tokens', JSON.stringify(tokens));
+  const logout = async () => {
+    try {
+      await signOut();
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('yt_user');
-    localStorage.removeItem('yt_tokens');
-  };
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
