@@ -1,19 +1,16 @@
 import axios from "axios";
 
-const API_KEY = import.meta.env.VITE_API_KEY;
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
 
 // Create axios instance factory with token support
 export const createYoutubeApi = (accessToken = null) => {
+  const headers = accessToken
+    ? { Authorization: `Bearer ${accessToken}` }
+    : { "X-Goog-Api-Key": import.meta.env.VITE_YOUTUBE_API_KEY };
+
   return axios.create({
     baseURL: BASE_URL,
-    headers: accessToken
-      ? {
-          Authorization: `Bearer ${accessToken}`,
-        }
-      : {
-          "X-Goog-Api-Key": import.meta.env.VITE_YOUTUBE_API_KEY,
-        },
+    headers
   });
 };
 
@@ -69,9 +66,10 @@ export const fetchVideos = async (query, maxResults = 10) => {
         maxResults,
         q: query,
         type: "video",
-        videoCategoryId: "10",
+        videoCategoryId: "10", // Music category
         order: "relevance",
         videoEmbeddable: true,
+        key: import.meta.env.VITE_YOUTUBE_API_KEY // Add API key as a parameter
       },
     });
     return response.data.items;
@@ -87,13 +85,15 @@ export const fetchVideos = async (query, maxResults = 10) => {
 // Get popular music videos
 export const getPopularMusicVideos = async (maxResults = 10) => {
   try {
-    const response = await youtubeApi.get("/videos", {
+    const api = createYoutubeApi();
+    const response = await api.get("/videos", {
       params: {
         part: "snippet,statistics",
         chart: "mostPopular",
         videoCategoryId: "10",
         maxResults,
-        regionCode: "US", // Can be changed based on user's location
+        regionCode: "US",
+        key: import.meta.env.VITE_YOUTUBE_API_KEY
       },
     });
     return response.data.items;
@@ -109,12 +109,14 @@ export const getPopularMusicVideos = async (maxResults = 10) => {
 // Search playlists
 export const searchPlaylists = async (query, maxResults = 10) => {
   try {
-    const response = await youtubeApi.get("/search", {
+    const api = createYoutubeApi();
+    const response = await api.get("/search", {
       params: {
         part: "snippet",
         maxResults,
         q: query,
         type: "playlist",
+        key: import.meta.env.VITE_YOUTUBE_API_KEY
       },
     });
     return response.data.items;

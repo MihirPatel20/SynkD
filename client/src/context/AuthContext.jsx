@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { loadGoogleApi, getAccessToken, signOut } from '../services/authService';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -7,37 +6,42 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Check authentication status on mount only
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        await loadGoogleApi();
-        const token = getAccessToken();
-        setIsAuthenticated(!!token);
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-      } finally {
-        setIsLoading(false);
-      }
+    const checkAuth = () => {
+      const token = localStorage.getItem('access_token');
+      setIsAuthenticated(!!token);
+      setIsLoading(false);
     };
-
-    initializeAuth();
+    
+    checkAuth();
   }, []);
 
-  const logout = async () => {
-    try {
-      await signOut();
-      setIsAuthenticated(false);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+  // Memoize logout function to prevent unnecessary re-renders
+  const logout = useCallback(() => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('yt_tokens');
+    setIsAuthenticated(false);
+  }, []);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, logout }}>
+    <AuthContext.Provider 
+      value={{ 
+        isAuthenticated, 
+        setIsAuthenticated: (value) => {
+          // Ensure we're not setting the same value
+          if (value !== isAuthenticated) {
+            setIsAuthenticated(value);
+          }
+        }, 
+        logout 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
