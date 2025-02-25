@@ -1,5 +1,11 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { Box, CssBaseline } from "@mui/material";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -11,13 +17,18 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Callback from "./pages/Callback";
+import { SnackbarProvider } from "./context/SnackbarContext";
 
 const App = () => {
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
+
   return (
     <AuthProvider>
-      <CssBaseline />
-      <Navbar />
-      <Box component="main" sx={{ flexGrow: 1, py: 3 }}>
+      
+    <SnackbarProvider >
+      <CssBaseline /> {!isLoginPage && <Navbar />}
+      <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
@@ -47,6 +58,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </Box>
+      </SnackbarProvider>
     </AuthProvider>
   );
 };
