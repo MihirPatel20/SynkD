@@ -6,6 +6,7 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { useAuth } from "../context/AuthContext";
 import { useSnackbar } from "../context/SnackbarContext";
 import sessionManager from "../services/auth/sessionManager";
+import { fetchUserProfile } from "../services/google/googleApi";
 
 const GoogleSignInButton = ({
   buttonText = "Sign in with Google",
@@ -14,7 +15,7 @@ const GoogleSignInButton = ({
   onLoginFailure,
 }) => {
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useAuth();
+  const { setUser, setIsAuthenticated } = useAuth();
   const { showSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
 
@@ -26,6 +27,10 @@ const GoogleSignInButton = ({
 
         // Store tokens securely
         localStorage.setItem("access_token", tokenResponse.access_token);
+
+        // Fetch user profile information
+        const userData = await fetchUserProfile(tokenResponse.access_token);
+        setUser(userData);
 
         // Initialize session
         sessionManager.initialize();
@@ -41,7 +46,7 @@ const GoogleSignInButton = ({
 
         // Show success message using global snackbar
         showSnackbar("Successfully signed in with Google!", "success");
-        
+
         // Redirect after a short delay
         setTimeout(() => {
           navigate(redirectPath, { replace: true });
@@ -49,7 +54,7 @@ const GoogleSignInButton = ({
       } catch (error) {
         console.error("Error during login:", error);
         showSnackbar("Login process failed", "error");
-        
+
         if (onLoginFailure) {
           onLoginFailure(error);
         }
@@ -60,7 +65,7 @@ const GoogleSignInButton = ({
     onError: (errorResponse) => {
       console.error("Login Failed:", errorResponse);
       showSnackbar("Google authentication failed", "error");
-      
+
       if (onLoginFailure) {
         onLoginFailure(errorResponse);
       }
