@@ -6,14 +6,7 @@ const VideoGrid = ({ videos = [] }) => {
   return (
     <Grid container spacing={2}>
       {videos.map((video) => (
-        <Grid
-          item
-          key={video?.id || video?.id?.videoId}
-          xs={12}
-          sm={6}
-          md={4}
-          lg={3}
-        >
+        <Grid key={video.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
           <VideoCard video={video} />
         </Grid>
       ))}
