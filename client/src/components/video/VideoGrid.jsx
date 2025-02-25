@@ -24,6 +24,12 @@ export const NewVideoGrid = ({ videos = [] }) => {
             description={video.description}
             thumbnail={video.thumbnail}
             videoId={video.id}
+            channelTitle={video.channelTitle}
+            publishedAt={video.publishedAt}
+            viewCount={video.viewCount}
+            likeCount={video.likeCount}
+            fromSubscription={video.fromSubscription}
+            
           />
         </Grid>
       ))}

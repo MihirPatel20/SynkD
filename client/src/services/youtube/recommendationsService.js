@@ -1,4 +1,4 @@
-import { createYoutubeApi } from './youtubeApi';
+import createYoutubeApiInstance from './youtubeApi';
 
 // Cache duration in milliseconds (5 minutes)
 const CACHE_DURATION = 5 * 60 * 1000;
@@ -99,7 +99,7 @@ export const getHomeRecommendations = async () => {
 
   try {
     const accessToken = localStorage.getItem('access_token');
-    const api = createYoutubeApi(accessToken);
+    const api = createYoutubeApiInstance(accessToken);
 
     const [activitiesResponse, popularResponse, subscriptionsResponse] = await Promise.all([
       api.get('/activities', {
@@ -132,6 +132,10 @@ export const getHomeRecommendations = async () => {
       subscriptionsResponse.data.items
     );
 
+    console.log('activities:', activitiesResponse.data.items);
+
+    console.log('Fetched recommendations:', recommendations);
+
     setCache(cacheKey, recommendations);
     return recommendations;
 
@@ -143,7 +147,7 @@ export const getHomeRecommendations = async () => {
 
 export const getPopularMusicVideos = async () => {
   try {
-    const api = createYoutubeApi();
+    const api = createYoutubeApiInstance();
     const response = await api.get('/videos', {
       params: {
         part: 'snippet,statistics',

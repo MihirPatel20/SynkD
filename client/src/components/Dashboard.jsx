@@ -1,7 +1,7 @@
 // src/components/Dashboard.jsx
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import createYoutubeApi from '../services/youtubeApi';
+import createYoutubeApiInstance from '../services/youtubeApi';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -9,7 +9,7 @@ const Dashboard = () => {
   
   useEffect(() => {
     const tokens = JSON.parse(localStorage.getItem('yt_tokens'));
-    const youtubeApi = createYoutubeApi(tokens.access_token);
+    const youtubeApi = createYoutubeApiInstance(tokens.access_token);
     
     const fetchPlaylists = async () => {
       try {

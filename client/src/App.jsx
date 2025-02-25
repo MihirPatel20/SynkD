@@ -28,7 +28,7 @@ const App = () => {
       <AuthProvider>
         <SnackbarProvider>
           <CssBaseline /> {!isLoginPage && <Navbar />}
-          <Box component="main" sx={{ flexGrow: 1 }}>
+          <Box component="main" sx={{ flexGrow: 1 }} py={isLoginPage ? 0 : 3}>
             <Routes>
               {/* Public Routes */}
               <Route path="/login" element={<Login />} />

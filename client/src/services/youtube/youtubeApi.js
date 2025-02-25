@@ -3,42 +3,49 @@ import axios from "axios";
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
 
 // Create axios instance factory with token support
-export const createYoutubeApi = (accessToken = null) => {
+const createYoutubeApiInstance = (accessToken = null) => {
   const headers = accessToken
     ? { Authorization: `Bearer ${accessToken}` }
     : { "X-Goog-Api-Key": import.meta.env.VITE_YOUTUBE_API_KEY };
 
   return axios.create({
     baseURL: BASE_URL,
-    headers
+    headers,
   });
 };
 
-// Get user's playlists (requires OAuth)
-export const getUserPlaylists = async (accessToken, maxResults = 50) => {
+export default createYoutubeApiInstance;
+
+// Modified existing functions to use the factory
+export const fetchVideos = async (query, maxResults = 10) => {
   try {
-    const api = createYoutubeApi(accessToken);
-    const response = await api.get("/playlists", {
+    const api = createYoutubeApiInstance();
+    const response = await api.get("/search", {
       params: {
-        part: "snippet,contentDetails",
-        mine: true,
+        part: "snippet",
         maxResults,
+        q: query,
+        type: "video",
+        videoCategoryId: "10", // Music category
+        order: "relevance",
+        videoEmbeddable: true,
+        key: import.meta.env.VITE_YOUTUBE_API_KEY, 
       },
     });
     return response.data.items;
   } catch (error) {
     console.error(
-      "Error fetching user playlists:",
+      "Error fetching videos:",
       error.response?.data || error.message
     );
-    throw new Error("Failed to fetch user playlists");
+    throw new Error("Failed to fetch videos");
   }
 };
 
 // Get user's liked videos (requires OAuth)
 export const getLikedVideos = async (accessToken, maxResults = 50) => {
   try {
-    const api = createYoutubeApi(accessToken);
+    const api = createYoutubeApiInstance(accessToken);
     const response = await api.get("/videos", {
       params: {
         part: "snippet,contentDetails",
@@ -56,36 +63,10 @@ export const getLikedVideos = async (accessToken, maxResults = 50) => {
   }
 };
 
-// Modified existing functions to use the factory
-export const fetchVideos = async (query, maxResults = 10) => {
-  try {
-    const api = createYoutubeApi();
-    const response = await api.get("/search", {
-      params: {
-        part: "snippet",
-        maxResults,
-        q: query,
-        type: "video",
-        videoCategoryId: "10", // Music category
-        order: "relevance",
-        videoEmbeddable: true,
-        key: import.meta.env.VITE_YOUTUBE_API_KEY // Add API key as a parameter
-      },
-    });
-    return response.data.items;
-  } catch (error) {
-    console.error(
-      "Error fetching videos:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch videos");
-  }
-};
-
 // Get popular music videos
 export const getPopularMusicVideos = async (maxResults = 10) => {
   try {
-    const api = createYoutubeApi();
+    const api = createYoutubeApiInstance();
     const response = await api.get("/videos", {
       params: {
         part: "snippet,statistics",
@@ -93,7 +74,7 @@ export const getPopularMusicVideos = async (maxResults = 10) => {
         videoCategoryId: "10",
         maxResults,
         regionCode: "US",
-        key: import.meta.env.VITE_YOUTUBE_API_KEY
+        key: import.meta.env.VITE_YOUTUBE_API_KEY,
       },
     });
     return response.data.items;
@@ -109,14 +90,14 @@ export const getPopularMusicVideos = async (maxResults = 10) => {
 // Search playlists
 export const searchPlaylists = async (query, maxResults = 10) => {
   try {
-    const api = createYoutubeApi();
+    const api = createYoutubeApiInstance();
     const response = await api.get("/search", {
       params: {
         part: "snippet",
         maxResults,
         q: query,
         type: "playlist",
-        key: import.meta.env.VITE_YOUTUBE_API_KEY
+        key: import.meta.env.VITE_YOUTUBE_API_KEY,
       },
     });
     return response.data.items;
@@ -126,5 +107,26 @@ export const searchPlaylists = async (query, maxResults = 10) => {
       error.response?.data || error.message
     );
     throw new Error("Failed to search playlists");
+  }
+};
+
+// Get user's playlists (requires OAuth)
+export const getUserPlaylists = async (accessToken, maxResults = 50) => {
+  try {
+    const api = createYoutubeApiInstance(accessToken);
+    const response = await api.get("/playlists", {
+      params: {
+        part: "snippet,contentDetails",
+        mine: true,
+        maxResults,
+      },
+    });
+    return response.data.items;
+  } catch (error) {
+    console.error(
+      "Error fetching user playlists:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to fetch user playlists");
   }
 };

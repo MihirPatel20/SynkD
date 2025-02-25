@@ -1,7 +1,6 @@
-import { createYoutubeApi } from '../youtube/youtubeApi';
 
-// Session timeout in milliseconds (30 minutes)
-const SESSION_TIMEOUT = 30 * 60 * 1000;
+// Session timeout in milliseconds (1 day)
+const SESSION_TIMEOUT = 60 * 60 * 1000 * 24;
 
 class SessionManager {
   constructor() {

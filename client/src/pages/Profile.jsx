@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
-import { createYoutubeApi } from "../services/youtube/youtubeApi";
+import createYoutubeApiInstance from "../services/youtube/youtubeApi";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -13,7 +13,7 @@ const Profile = () => {
     const fetchUserData = async () => {
       try {
         const tokens = JSON.parse(localStorage.getItem("yt_tokens"));
-        const youtubeApi = createYoutubeApi(tokens.access_token);
+        const youtubeApi = createYoutubeApiInstance(tokens.access_token);
         const userPlaylists = await youtubeApi.getUserPlaylists();
         setPlaylists(userPlaylists);
       } catch (error) {
