@@ -43,8 +43,9 @@ import {
   MoreVert as MoreVertIcon,
 } from "@mui/icons-material";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
 import { formatDistanceToNow, formatDuration } from "date-fns";
-import { getPlaylistDetails } from "../services/youtube/youtubeApi";
+import { getPlaylistDetails } from "../../services/api/youtubeDataApi";
 
 // Player Controls Component
 const PlayerControls = ({

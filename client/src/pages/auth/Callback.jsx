@@ -2,8 +2,9 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
-import { useAuth } from '../context/AuthContext';
-import { getTokens } from '../services/authService';
+
+import { useAuth } from '../../context/AuthContext';
+import { getTokens } from '../../services/api/googleApi';
 
 const Callback = () => {
   const navigate = useNavigate();

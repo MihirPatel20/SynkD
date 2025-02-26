@@ -2,7 +2,7 @@ import React from "react";
 import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import SearchBar from "../search/SearchBar";
+import SearchBar from "./SearchBar";
 import LogoutButton from "../auth/LogoutButton";
 
 const Navbar = () => {

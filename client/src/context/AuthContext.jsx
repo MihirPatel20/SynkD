@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { fetchUserProfile } from "../services/google/googleApi";
+import { fetchUserProfile } from "../services/api/googleApi";
 
 const AuthContext = createContext(null);
 

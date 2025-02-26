@@ -11,64 +11,12 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
-import { formatDistanceToNow } from "date-fns";
-import VerifiedIcon from "@mui/icons-material/Verified";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 
-const VideoCard = ({ video }) => {
-  console.log("Video:", video);
+import { formatDate } from "../../utils/dateUtils";
 
-  const navigate = useNavigate();
-
-  // Guard against undefined video data
-  if (!video?.snippet) {
-    return null;
-  }
-
-  const handleClick = () => {
-    const videoId = video?.id || video?.id?.videoId;
-    if (videoId) {
-      navigate(`/watch/${videoId}`);
-    }
-  };
-
-  return (
-    <Card
-      onClick={handleClick}
-      sx={{
-        cursor: "pointer",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: 3,
-          transition: "all 0.2s ease-in-out",
-        },
-      }}
-    >
-      <CardMedia
-        component="img"
-        height="180"
-        image={
-          video.snippet.thumbnails?.medium?.url ||
-          video.snippet.thumbnails?.default?.url
-        }
-        alt={video.snippet.title || "Video thumbnail"}
-      />
-      <CardContent>
-        <Typography variant="subtitle1" noWrap>
-          {video.snippet.title || "Untitled"}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" noWrap>
-          {video.snippet.description || "No description available"}
-        </Typography>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default VideoCard;
-
-export const NewVideoCard = ({
+const VideoCard = ({
   title,
   description,
   thumbnail,
@@ -96,16 +44,6 @@ export const NewVideoCard = ({
       return (num / 1000).toFixed(1) + "K";
     }
     return num.toString();
-  };
-
-  // Format date as "2 days ago", "3 months ago", etc.
-  const formatDate = (dateString) => {
-    try {
-      const date = new Date(dateString);
-      return formatDistanceToNow(date, { addSuffix: true });
-    } catch (error) {
-      return "";
-    }
   };
 
   // Get channel initial for avatar fallback
@@ -159,25 +97,43 @@ export const NewVideoCard = ({
         )}
       </Box>
 
-      <CardContent sx={{ flexGrow: 1, p: 2 }}>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 600,
-            mb: 1,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            lineHeight: 1.3,
-            height: "2.6em",
-          }}
-        >
-          {title}
-        </Typography>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          p: 1.5,
+          pb: 0,
+          color: "text.secondary",
+          fontSize: "0.75rem",
+        }}
+      >
+        {viewCount && (
+          <Tooltip title={`${viewCount} views`}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <VisibilityIcon sx={{ fontSize: 14, mr: 0.5 }} />
+              {formatCount(viewCount)}
+            </Box>
+          </Tooltip>
+        )}
 
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
+        {likeCount && (
+          <Tooltip title={`${likeCount} likes`}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <ThumbUpIcon sx={{ fontSize: 14, mr: 0.5 }} />
+              {formatCount(likeCount)}
+            </Box>
+          </Tooltip>
+        )}
+
+        {publishedAt && (
+          <Typography variant="caption" color="text.secondary">
+            {formatDate(publishedAt)}
+          </Typography>
+        )}
+      </Stack>
+
+      <CardContent sx={{ flexGrow: 1, p: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "top", mb: 1.5 }}>
           <Avatar
             sx={{
               width: 28,
@@ -190,60 +146,28 @@ export const NewVideoCard = ({
             {getChannelInitial()}
           </Avatar>
           <Typography
-            variant="body2"
-            color="text.secondary"
+            variant="subtitle1"
+            align="left"
             sx={{
-              display: "flex",
-              alignItems: "center",
-              fontWeight: 500,
+              fontWeight: 600,
+              mb: 1,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              lineHeight: 1.3,
+              height: "2.6em",
             }}
           >
-            {channelTitle}
-            {fromSubscription && (
-              <VerifiedIcon
-                sx={{ ml: 0.5, fontSize: 14, color: "primary.main" }}
-              />
-            )}
+            {title}
           </Typography>
         </Box>
-
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{
-            mb: 1.5,
-            color: "text.secondary",
-            fontSize: "0.75rem",
-          }}
-        >
-          {viewCount && (
-            <Tooltip title={`${viewCount} views`}>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <VisibilityIcon sx={{ fontSize: 14, mr: 0.5 }} />
-                {formatCount(viewCount)}
-              </Box>
-            </Tooltip>
-          )}
-
-          {likeCount && (
-            <Tooltip title={`${likeCount} likes`}>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <ThumbUpIcon sx={{ fontSize: 14, mr: 0.5 }} />
-                {formatCount(likeCount)}
-              </Box>
-            </Tooltip>
-          )}
-
-          {publishedAt && (
-            <Typography variant="caption" color="text.secondary">
-              {formatDate(publishedAt)}
-            </Typography>
-          )}
-        </Stack>
 
         <Typography
           variant="body2"
           color="text.secondary"
+          align="left"
           sx={{
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -261,3 +185,5 @@ export const NewVideoCard = ({
     </Card>
   );
 };
+
+export default VideoCard;

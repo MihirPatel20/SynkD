@@ -8,18 +8,18 @@ import {
 } from "react-router-dom";
 import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Navbar from "./components/layout/Navbar";
-import Home from "./pages/Home";
-import Watch from "./pages/Watch";
-import Search from "./pages/Search";
-import Login from "./pages/Login";
-import Profile from "./pages/Profile";
-import Playlists from "./pages/Playlists";
-import PlaylistDetail from "./pages/PlaylistDetail";
-import Callback from "./pages/Callback";
 import { SnackbarProvider } from "./context/SnackbarContext";
-import { theme } from "./theme";
+import { theme } from "./styles/theme";
+import Login from "./pages/auth/Login";
+import Callback from "./pages/auth/Callback";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Home from "./pages/home/Home";
+import Playlists from "./pages/playlists/Playlists";
+import PlaylistDetail from "./pages/playlists/PlaylistDetail";
+import Profile from "./pages/profile/Profile";
+import Search from "./pages/search/Search";
+import Watch from "./pages/watch/Watch";
 
 const App = () => {
   const location = useLocation();

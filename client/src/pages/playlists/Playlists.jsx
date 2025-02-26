@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Box, 
-  Grid, 
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Typography,
+  Box,
+  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -11,33 +11,32 @@ import {
   TextField,
   InputAdornment,
   CircularProgress,
-  Divider
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import { getUserPlaylists } from '../services/youtube/youtubeApi';
-import PlaylistCard from '../components/playlists/PlaylistCard';
-import { useAuth } from '../context/AuthContext';
-import { useSnackbar } from '../context/SnackbarContext';
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+
+import { getUserPlaylists } from "../../services/api/youtubeDataApi";
+import PlaylistCard from "./PlaylistCard";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 const Playlists = () => {
   const { showSnackbar } = useSnackbar();
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('recent');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState("recent");
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredPlaylists, setFilteredPlaylists] = useState([]);
 
   useEffect(() => {
     const fetchPlaylists = async () => {
       try {
-        const accessToken = localStorage.getItem('access_token');
+        const accessToken = localStorage.getItem("access_token");
         const userPlaylists = await getUserPlaylists(accessToken);
-        console.log('userPlaylists:', userPlaylists);
+        console.log("userPlaylists:", userPlaylists);
         setPlaylists(userPlaylists);
         setFilteredPlaylists(userPlaylists);
       } catch (error) {
-        console.error('Error fetching playlists:', error);
-        showSnackbar('Failed to load playlists', 'error');
+        console.error("Error fetching playlists:", error);
+        showSnackbar("Failed to load playlists", "error");
       } finally {
         setLoading(false);
       }
@@ -47,20 +46,29 @@ const Playlists = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = playlists.filter(playlist => 
-      playlist.snippet.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      playlist.snippet.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    const filtered = playlists.filter(
+      (playlist) =>
+        playlist.snippet.title
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        playlist.snippet.description
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase())
     );
 
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
-        case 'name':
+        case "name":
           return a.snippet.title.localeCompare(b.snippet.title);
-        case 'date':
-          return new Date(b.snippet.publishedAt) - new Date(a.snippet.publishedAt);
-        case 'recent':
+        case "date":
+          return (
+            new Date(b.snippet.publishedAt) - new Date(a.snippet.publishedAt)
+          );
+        case "recent":
           // In a real app, you'd track last played date
-          return new Date(b.snippet.publishedAt) - new Date(a.snippet.publishedAt);
+          return (
+            new Date(b.snippet.publishedAt) - new Date(a.snippet.publishedAt)
+          );
         default:
           return 0;
       }
@@ -71,7 +79,12 @@ const Playlists = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
         <CircularProgress />
       </Box>
     );
@@ -84,13 +97,15 @@ const Playlists = () => {
           Your Playlists
         </Typography>
 
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 2, 
-          mb: 4,
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'stretch', sm: 'center' }
-        }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            mb: 4,
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
+          }}
+        >
           <TextField
             placeholder="Search playlists..."
             value={searchQuery}
@@ -104,7 +119,7 @@ const Playlists = () => {
             }}
             sx={{ flex: 1 }}
           />
-          
+
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel>Sort by</InputLabel>
             <Select
@@ -133,7 +148,9 @@ const Playlists = () => {
               No playlists found
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {searchQuery ? 'Try adjusting your search' : 'Create your first playlist to get started'}
+              {searchQuery
+                ? "Try adjusting your search"
+                : "Create your first playlist to get started"}
             </Typography>
           </Box>
         )}

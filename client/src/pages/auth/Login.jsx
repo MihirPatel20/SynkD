@@ -17,12 +17,13 @@ import {
   Avatar,
   CssBaseline,
 } from "@mui/material";
-import sessionManager from "../services/auth/sessionManager";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import LockIcon from "@mui/icons-material/Lock";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import GoogleSignInButton from "../components/GoogleSignInButton";
+
+import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
+import sessionManager from "../../services/auth/sessionManager";
 
 const Login = () => {
   const [email, setEmail] = useState("");

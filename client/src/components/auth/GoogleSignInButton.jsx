@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGoogleLogin } from "@react-oauth/google";
 import { Button, CircularProgress } from "@mui/material";
+import { useGoogleLogin } from "@react-oauth/google";
 import GoogleIcon from "@mui/icons-material/Google";
-import { useAuth } from "../context/AuthContext";
-import { useSnackbar } from "../context/SnackbarContext";
-import sessionManager from "../services/auth/sessionManager";
-import { fetchUserProfile } from "../services/google/googleApi";
+
+import { useAuth } from "../../context/AuthContext";
+import { useSnackbar } from "../../context/SnackbarContext";
+import sessionManager from "../../services/auth/sessionManager";
+import { fetchUserProfile } from "../../services/api/googleApi";
 
 const GoogleSignInButton = ({
   buttonText = "Sign in with Google",

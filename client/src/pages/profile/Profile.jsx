@@ -18,12 +18,14 @@ import {
   Button
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useAuth } from "../context/AuthContext";
-import { getUserPlaylists } from "../services/youtube/youtubeApi";
 import EmailIcon from '@mui/icons-material/Email';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+
+
+import { useAuth } from "../../context/AuthContext";
+import { getUserPlaylists } from "../../services/api/youtubeDataApi";
 
 // Styled components for enhanced aesthetics
 const ProfileHeader = styled(Paper)(({ theme }) => ({

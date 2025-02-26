@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Container, Typography, Box, CircularProgress } from "@mui/material";
-import { NewVideoGrid } from "../components/video/VideoGrid";
-import recommendationsService from "../services/youtube/recommendationsService";
-import sessionManager from "../services/auth/sessionManager";
-import { useAuth } from "../context/AuthContext";
+
+import VideoGrid from "../../components/video/VideoGrid";
+import recommendationsService from "../../services/recommendations/recommendationsService";
+import sessionManager from "../../services/auth/sessionManager";
+import { useAuth } from "../../context/AuthContext";
 
 const Home = () => {
   const [videos, setVideos] = useState([]);
@@ -77,7 +78,7 @@ const Home = () => {
         <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
           Recommended for You
         </Typography>
-        <NewVideoGrid videos={videos} />
+        <VideoGrid videos={videos} />
       </Box>
     </Container>
   );

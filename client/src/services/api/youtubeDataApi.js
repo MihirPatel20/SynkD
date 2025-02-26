@@ -1,25 +1,10 @@
-import axios from "axios";
-
-const BASE_URL = "https://www.googleapis.com/youtube/v3";
-
-// Create axios instance factory with token support
-const createYoutubeApiInstance = (accessToken = null) => {
-  const headers = accessToken
-    ? { Authorization: `Bearer ${accessToken}` }
-    : { "X-Goog-Api-Key": import.meta.env.VITE_YOUTUBE_API_KEY };
-
-  return axios.create({
-    baseURL: BASE_URL,
-    headers,
-  });
-};
-
-export default createYoutubeApiInstance;
+import { processResponseData } from "../../utils/formatters.js";
+import createGapiInstance from "./googleApi";
 
 // Modified existing functions to use the factory
 export const fetchVideos = async (query, maxResults = 10) => {
   try {
-    const api = createYoutubeApiInstance();
+    const api = createGapiInstance();
     const response = await api.get("/search", {
       params: {
         part: "snippet",
@@ -32,7 +17,14 @@ export const fetchVideos = async (query, maxResults = 10) => {
         key: import.meta.env.VITE_YOUTUBE_API_KEY,
       },
     });
-    return response.data.items;
+
+    // format the response data
+    const formattedData = processResponseData(response.data.items);
+
+    // console.log("response.data.items:", response.data.items);
+    // console.log("formattedData:", formattedData);
+
+    return formattedData;
   } catch (error) {
     console.error(
       "Error fetching videos:",
@@ -42,55 +34,10 @@ export const fetchVideos = async (query, maxResults = 10) => {
   }
 };
 
-// Get user's liked videos (requires OAuth)
-export const getLikedVideos = async (accessToken, maxResults = 50) => {
-  try {
-    const api = createYoutubeApiInstance(accessToken);
-    const response = await api.get("/videos", {
-      params: {
-        part: "snippet,contentDetails",
-        myRating: "like",
-        maxResults,
-      },
-    });
-    return response.data.items;
-  } catch (error) {
-    console.error(
-      "Error fetching liked videos:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch liked videos");
-  }
-};
-
-// Get popular music videos
-export const getPopularMusicVideos = async (maxResults = 10) => {
-  try {
-    const api = createYoutubeApiInstance();
-    const response = await api.get("/videos", {
-      params: {
-        part: "snippet,statistics",
-        chart: "mostPopular",
-        videoCategoryId: "10",
-        maxResults,
-        regionCode: "US",
-        key: import.meta.env.VITE_YOUTUBE_API_KEY,
-      },
-    });
-    return response.data.items;
-  } catch (error) {
-    console.error(
-      "Error fetching popular videos:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch popular videos");
-  }
-};
-
 // Search playlists
 export const searchPlaylists = async (query, maxResults = 10) => {
   try {
-    const api = createYoutubeApiInstance();
+    const api = createGapiInstance();
     const response = await api.get("/search", {
       params: {
         part: "snippet",
@@ -113,7 +60,7 @@ export const searchPlaylists = async (query, maxResults = 10) => {
 // Get user's playlists (requires OAuth)
 export const getUserPlaylists = async (accessToken, maxResults = 10) => {
   try {
-    const api = createYoutubeApiInstance(accessToken);
+    const api = createGapiInstance(accessToken);
     let allPlaylists = [];
     let nextPageToken = null;
 
@@ -145,7 +92,7 @@ export const getUserPlaylists = async (accessToken, maxResults = 10) => {
 export const getPlaylistDetails = async (playlistId) => {
   console.log("playlistId:", playlistId);
   try {
-    const api = createYoutubeApiInstance();
+    const api = createGapiInstance();
 
     // Get playlist metadata
     const playlistResponse = await api.get("/playlists", {

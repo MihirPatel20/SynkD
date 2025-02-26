@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Grid, Typography, Box } from '@mui/material';
-import MusicPlayer from '../components/video/MusicPlayer';
-import VideoList from '../components/video/VideoList';
-import { fetchVideos } from '../services/youtube/youtubeApi.js';
+
+import MusicPlayer from '../../components/video/MusicPlayer';
+import VideoList from '../../components/video/UpNextVideoList.jsx';
+import { fetchVideos } from '../../services/api/youtubeDataApi.js';
 
 const Watch = () => {
   const { videoId } = useParams();
