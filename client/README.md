@@ -1,8 +1,57 @@
+# SynkD - Music Streaming App
+
+SynkD is a modern music streaming application built with React and Vite. It leverages the YouTube Data API to provide users with a seamless experience for discovering and playing music videos. The app includes features such as user authentication, personalized recommendations, and playlist management.
+
+## Getting Started
+
+To get started with SynkD, follow these steps:
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yourusername/synkd.git
+   cd synkd
+   ```
+
+2. **Install dependencies:**
+
+   Ensure you have Node.js and npm installed. Then, run:
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables:**
+
+   Create a `.env` file in the `client` directory and add the following variables:
+
+   ```plaintext
+   VITE_GOOGLE_CLIENT_ID=your_google_client_id
+   VITE_GOOGLE_CLIENT_SECRET=your_google_client_secret
+   VITE_YOUTUBE_API_KEY=your_youtube_api_key
+   VITE_YOUTUBE_CLIENT_ID=your_youtube_client_id
+   VITE_YOUTUBE_CLIENT_SECRET=your_youtube_client_secret
+   VITE_YOUTUBE_REDIRECT_URI=your_redirect_uri
+   ```
+
+4. **Run the development server:**
+
+   ```bash
+   npm run dev
+   ```
+
+   The application will be available at `http://localhost:3000`.
+
+## Folder Structure
+
+Here's an overview of the project's folder structure:
+
 ```
 src/
 ├── assets/                      # Static assets like images, icons, fonts
 │   ├── icons/
 │   └── images/
+│
 ├── components/
 │   ├── auth/                    # Authentication components
 │   │   ├── GoogleSignInButton.jsx
@@ -31,11 +80,13 @@ src/
 │       ├── VideoCard.jsx
 │       ├── VideoGrid.jsx
 │       └── VideoList.jsx
+│
 ├── context/                     # React context providers
 │   ├── AuthContext.jsx
 │   ├── PlayerContext.jsx
 │   ├── PlaylistContext.jsx
 │   └── SnackbarContext.jsx
+│
 ├── features/                    # Feature-specific modules
 │   ├── analytics/               # User listening analytics
 │   │   ├── components/
@@ -49,11 +100,13 @@ src/
 │       ├── components/
 │       ├── hooks/
 │       └── utils/
+│
 ├── hooks/                       # Custom React hooks
 │   ├── useAuth.js
 │   ├── usePlaylists.js
 │   ├── useRecommendations.js
 │   └── useYoutubeApi.js
+│
 ├── pages/                       # Page components
 │   ├── analytics/
 │   │   └── ListeningStats.jsx
@@ -72,6 +125,7 @@ src/
 │   │   └── Search.jsx
 │   └── watch/
 │       └── Watch.jsx
+│
 ├── services/                    # API and service integrations
 │   ├── api/                     # API clients
 │   │   ├── apiClient.js         # Base API client with interceptors
@@ -84,134 +138,42 @@ src/
 │   │   └── listeningAnalytics.js
 │   └── recommendations/         # Recommendation algorithms
 │       └── recommendationEngine.js
-├── store/                       # State management (if using Redux/Zustand)
-│   ├── actions/
-│   ├── reducers/
-│   └── store.js
+│
 ├── styles/                      # Global styles
 │   ├── globalStyles.css
 │   ├── theme.js
 │   └── variables.css
+│
 ├── utils/                       # Utility functions
 │   ├── dateUtils.js
 │   ├── formatters.js
 │   ├── localStorage.js
 │   └── validators.js
+│
 ├── App.jsx
 └── main.jsx
 ```
 
-To generate folder structure
-``` # Navigate to src directory
-Set-Location src
+## Project Overview
 
-# Create all directories
+SynkD is designed to provide users with a rich music streaming experience. Key features include:
 
-$directories = @(
-"assets/icons",
-"assets/images",
-"components/auth",
-"components/common",
-"components/layout",
-"components/playlists",
-"components/recommendations",
-"components/video",
-"context",
-"features/analytics/components",
-"features/analytics/hooks",
-"features/analytics/utils",
-"features/playlist-generation/components",
-"features/playlist-generation/hooks",
-"features/playlist-generation/utils",
-"features/user-preferences/components",
-"features/user-preferences/hooks",
-"features/user-preferences/utils",
-"hooks",
-"pages/analytics",
-"pages/auth",
-"pages/home",
-"pages/playlists",
-"pages/profile",
-"pages/search",
-"pages/watch",
-"services/api",
-"services/auth",
-"services/analytics",
-"services/recommendations",
-"store/actions",
-"store/reducers",
-"styles",
-"utils"
-)
+- **User Authentication:** Secure login using Google OAuth.
+- **Music Discovery:** Search and play music videos from YouTube.
+- **Personalized Recommendations:** Get video recommendations based on user activity and preferences.
+- **Playlist Management:** Create and manage playlists of favorite music videos.
+- **Responsive Design:** Optimized for both desktop and mobile devices.
 
-foreach ($dir in $directories) {
-New-Item -Path $dir -ItemType Directory -Force
-}
+## Future Enhancements
 
-# Create all files
+Here are some ideas for future improvements:
 
-$files = @(
-"components/auth/GoogleSignInButton.jsx",
-"components/auth/LogoutButton.jsx",
-"components/auth/ProtectedRoute.jsx",
-"components/common/Button.jsx",
-"components/common/Card.jsx",
-"components/common/Loader.jsx",
-"components/common/Modal.jsx",
-"components/layout/Footer.jsx",
-"components/layout/MainLayout.jsx",
-"components/layout/Navbar.jsx",
-"components/layout/Sidebar.jsx",
-"components/playlists/CreatePlaylistForm.jsx",
-"components/playlists/PlaylistCard.jsx",
-"components/playlists/PlaylistGrid.jsx",
-"components/playlists/PlaylistStats.jsx",
-"components/recommendations/RecommendationCard.jsx",
-"components/recommendations/RecommendationList.jsx",
-"components/video/MusicPlayer.jsx",
-"components/video/VideoCard.jsx",
-"components/video/VideoGrid.jsx",
-"components/video/VideoList.jsx",
-"context/AuthContext.jsx",
-"context/PlayerContext.jsx",
-"context/PlaylistContext.jsx",
-"context/SnackbarContext.jsx",
-"hooks/useAuth.js",
-"hooks/usePlaylists.js",
-"hooks/useRecommendations.js",
-"hooks/useYoutubeApi.js",
-"pages/analytics/ListeningStats.jsx",
-"pages/auth/Callback.jsx",
-"pages/auth/Login.jsx",
-"pages/home/Home.jsx",
-"pages/playlists/CreatePlaylist.jsx",
-"pages/playlists/PlaylistDetail.jsx",
-"pages/playlists/Playlists.jsx",
-"pages/profile/Profile.jsx",
-"pages/search/Search.jsx",
-"pages/watch/Watch.jsx",
-"services/api/apiClient.js",
-"services/api/googleApi.js",
-"services/api/youtubeApi.js",
-"services/auth/authService.js",
-"services/auth/sessionManager.js",
-"services/analytics/listeningAnalytics.js",
-"services/recommendations/recommendationEngine.js",
-"store/store.js",
-"styles/globalStyles.css",
-"styles/theme.js",
-"styles/variables.css",
-"utils/dateUtils.js",
-"utils/formatters.js",
-"utils/localStorage.js",
-"utils/validators.js",
-"App.jsx",
-"main.jsx"
-)
-
-foreach ($file in $files) {
-New-Item -Path $file -ItemType File -Force
-}
-
-Write-Host "Folder structure created successfully!" -ForegroundColor Green
-```
+- **Playlist Manager:**
+  - Allow users to view all their playlists in one place.
+  - Enable users to select multiple playlists and perform actions on them.
+  - Access analytics for the selected playlists, allowing users to sort songs from least played to most played. This feature will help users discover new songs within their playlists and avoid repetitive listening.
+  - Research and implement a way to access the user's YouTube Music history to prevent playing the same songs again within a 4-hour window. This could enhance the listening experience by ensuring variety in song selection.
+- **Social Features:** Enable users to share playlists and follow other users.
+- **Integration with Other Services:** Connect with other music services for a more comprehensive library.
+- **Enhanced Recommendations:** Use machine learning to improve recommendation accuracy.
+- **Offline Mode:** Allow users to download and play music offline.

@@ -6,7 +6,6 @@ import { useAuth } from "../../context/AuthContext";
 const UserProfileChip = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  console.log("User object:", user);
 
   const handleProfileClick = () => {
     navigate("/profile");

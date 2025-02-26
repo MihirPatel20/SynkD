@@ -52,9 +52,7 @@ const fetchUserProfile = async (accessToken) => {
     // Make request to Google's userinfo endpoint
     const response = await api.get(
       "https://www.googleapis.com/oauth2/v3/userinfo"
-    );
-
-    console.log("User profile:", response.data);
+    );  
 
     return response.data;
   } catch (error) {
