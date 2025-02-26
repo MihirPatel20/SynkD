@@ -54,6 +54,8 @@ const fetchUserProfile = async (accessToken) => {
       "https://www.googleapis.com/oauth2/v3/userinfo"
     );
 
+    console.log("User profile:", response.data);
+
     return response.data;
   } catch (error) {
     console.error("Error fetching user profile:", error);

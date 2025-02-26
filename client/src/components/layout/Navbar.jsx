@@ -4,6 +4,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import SearchBar from "./SearchBar";
 import LogoutButton from "../auth/LogoutButton";
+import UserProfileChip from "./UserProfileChip";
 
 const Navbar = () => {
   const { isAuthenticated } = useAuth();
@@ -37,7 +38,12 @@ const Navbar = () => {
           Playlists
         </Button>
 
-        {isAuthenticated && <LogoutButton />}
+        {isAuthenticated && (
+          <>
+            <LogoutButton />
+            <UserProfileChip />
+          </>
+        )}
       </Toolbar>
     </AppBar>
   );
