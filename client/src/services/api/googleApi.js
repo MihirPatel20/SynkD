@@ -1,25 +1,6 @@
-import axios from "axios";
-
-const BASE_URL = "https://www.googleapis.com/youtube/v3";
-
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
-const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
-
-// Create a new axios instance for Google API
-const createGapiInstance = (accessToken = null) => {
-  const headers = accessToken
-    ? { Authorization: `Bearer ${accessToken}` }
-    : { "X-Goog-Api-Key": API_KEY };
-
-  return axios.create({
-    baseURL: BASE_URL,
-    headers,
-  });
-};
-
-export default createGapiInstance;
 
 // Get tokens from authorization code
 const getTokens = async (code) => {
@@ -47,15 +28,21 @@ const getTokens = async (code) => {
 // Fetch user profile
 const fetchUserProfile = async (accessToken) => {
   try {
-    // You can use your existing axios instance factory
-    const api = createGapiInstance(accessToken);
-
-    // Make request to Google's userinfo endpoint
-    const response = await api.get(
-      "https://www.googleapis.com/oauth2/v3/userinfo"
+    const response = await fetch(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
     );
 
-    return response.data;
+    if (!response.ok) {
+      throw new Error("Failed to fetch user profile");
+    }
+
+    return response.json();
   } catch (error) {
     console.error("Error fetching user profile:", error);
     throw error;

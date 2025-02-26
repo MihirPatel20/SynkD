@@ -1,12 +1,27 @@
 import { processResponseData } from "../../utils/formatters.js";
-import createGapiInstance from "./googleApi";
+import axios from "axios";
 
+const BASE_URL = "https://www.googleapis.com/youtube/v3";
 const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+
+// Create a new axios instance for YouTube Data API
+const createYTDataInstance = (accessToken = null) => {
+  const headers = accessToken
+    ? { Authorization: `Bearer ${accessToken}` }
+    : { "X-Goog-Api-Key": API_KEY };
+
+  return axios.create({
+    baseURL: BASE_URL,
+    headers,
+  });
+};
+
+export default createYTDataInstance;
 
 // Modified existing functions to use the factory
 export const fetchVideos = async (query, maxResults = 10) => {
   try {
-    const api = createGapiInstance();
+    const api = createYTDataInstance();
     const response = await api.get("/search", {
       params: {
         part: "snippet",
@@ -23,9 +38,6 @@ export const fetchVideos = async (query, maxResults = 10) => {
     // format the response data
     const formattedData = processResponseData(response.data.items);
 
-    // console.log("response.data.items:", response.data.items);
-    // console.log("formattedData:", formattedData);
-
     return formattedData;
   } catch (error) {
     console.error(
@@ -39,7 +51,7 @@ export const fetchVideos = async (query, maxResults = 10) => {
 // Search playlists
 export const searchPlaylists = async (query, maxResults = 10) => {
   try {
-    const api = createGapiInstance();
+    const api = createYTDataInstance();
     const response = await api.get("/search", {
       params: {
         part: "snippet",
@@ -62,7 +74,7 @@ export const searchPlaylists = async (query, maxResults = 10) => {
 // Get user's playlists (requires OAuth)
 export const getUserPlaylists = async (accessToken, maxResults = 10) => {
   try {
-    const api = createGapiInstance(accessToken);
+    const api = createYTDataInstance(accessToken);
     let allPlaylists = [];
     let nextPageToken = null;
 
@@ -92,9 +104,8 @@ export const getUserPlaylists = async (accessToken, maxResults = 10) => {
 
 // Get playlist details and items
 export const getPlaylistDetails = async (playlistId) => {
-  console.log("playlistId:", playlistId);
   try {
-    const api = createGapiInstance();
+    const api = createYTDataInstance();
 
     // Get playlist metadata
     const playlistResponse = await api.get("/playlists", {
@@ -103,8 +114,6 @@ export const getPlaylistDetails = async (playlistId) => {
         id: playlistId,
       },
     });
-
-    console.log("playlistResponse:", playlistResponse && playlistResponse.data);
 
     if (
       !playlistResponse.data.items ||
@@ -123,8 +132,6 @@ export const getPlaylistDetails = async (playlistId) => {
         maxResults: 50,
       },
     });
-
-    console.log("itemsResponse:", itemsResponse.data);
 
     // Process items to match your component's expected format
     const formattedItems = itemsResponse.data.items.map((item) => ({

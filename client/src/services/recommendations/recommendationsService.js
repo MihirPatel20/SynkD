@@ -1,5 +1,5 @@
 import { processResponseData } from "../../utils/formatters";
-import createGapiInstance from "../api/googleApi";
+import createYTDataInstance from "../api/youtubeDataApi";
 
 // Cache duration in milliseconds (5 minutes)
 const CACHE_DURATION = 5 * 60 * 1000;
@@ -55,7 +55,7 @@ export const getHomeRecommendations = async () => {
 
   try {
     const accessToken = localStorage.getItem("access_token");
-    const api = createGapiInstance(accessToken);
+    const api = createYTDataInstance(accessToken);
 
     const [activitiesResponse, popularResponse, subscriptionsResponse] =
       await Promise.all([
