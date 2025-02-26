@@ -1,9 +1,9 @@
-import React from 'react';
-import { AppBar, Toolbar, Typography, Box } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import SearchBar from '../search/SearchBar';
-import LogoutButton from '../auth/LogoutButton';
+import React from "react";
+import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import SearchBar from "../search/SearchBar";
+import LogoutButton from "../auth/LogoutButton";
 
 const Navbar = () => {
   const { isAuthenticated } = useAuth();
@@ -16,17 +16,27 @@ const Navbar = () => {
           component={RouterLink}
           to="/"
           sx={{
-            textDecoration: 'none',
-            color: 'inherit',
+            textDecoration: "none",
+            color: "inherit",
             flexGrow: 0,
-            mr: 2
+            mr: 2,
           }}
         >
           SynkD
         </Typography>
-        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
           <SearchBar />
         </Box>
+
+        <Button
+          component={RouterLink}
+          to="/playlists"
+          color="inherit"
+          sx={{ textTransform: "none" }}
+        >
+          Playlists
+        </Button>
+
         {isAuthenticated && <LogoutButton />}
       </Toolbar>
     </AppBar>

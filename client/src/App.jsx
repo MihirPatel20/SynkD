@@ -15,6 +15,8 @@ import Watch from "./pages/Watch";
 import Search from "./pages/Search";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import Playlists from "./pages/Playlists";
+import PlaylistDetail from "./pages/PlaylistDetail";
 import Callback from "./pages/Callback";
 import { SnackbarProvider } from "./context/SnackbarContext";
 import { theme } from "./theme";
@@ -50,6 +52,22 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/playlists"
+                element={
+                  <ProtectedRoute>
+                    <Playlists />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/playlist/:id"
+                element={
+                  <ProtectedRoute>
+                    <PlaylistDetail />
                   </ProtectedRoute>
                 }
               />

@@ -29,7 +29,7 @@ export const fetchVideos = async (query, maxResults = 10) => {
         videoCategoryId: "10", // Music category
         order: "relevance",
         videoEmbeddable: true,
-        key: import.meta.env.VITE_YOUTUBE_API_KEY, 
+        key: import.meta.env.VITE_YOUTUBE_API_KEY,
       },
     });
     return response.data.items;
@@ -111,22 +111,93 @@ export const searchPlaylists = async (query, maxResults = 10) => {
 };
 
 // Get user's playlists (requires OAuth)
-export const getUserPlaylists = async (accessToken, maxResults = 50) => {
+export const getUserPlaylists = async (accessToken, maxResults = 10) => {
   try {
     const api = createYoutubeApiInstance(accessToken);
-    const response = await api.get("/playlists", {
-      params: {
-        part: "snippet,contentDetails",
-        mine: true,
-        maxResults,
-      },
-    });
-    return response.data.items;
+    let allPlaylists = [];
+    let nextPageToken = null;
+
+    do {
+      const response = await api.get("/playlists", {
+        params: {
+          part: "snippet,contentDetails",
+          mine: true,
+          maxResults,
+          pageToken: nextPageToken,
+        },
+      });
+
+      allPlaylists = [...allPlaylists, ...response.data.items];
+      nextPageToken = response.data.nextPageToken;
+    } while (nextPageToken);
+
+    return allPlaylists;
   } catch (error) {
     console.error(
       "Error fetching user playlists:",
       error.response?.data || error.message
     );
     throw new Error("Failed to fetch user playlists");
+  }
+};
+
+// Get playlist details and items
+export const getPlaylistDetails = async (playlistId) => {
+  console.log("playlistId:", playlistId);
+  try {
+    const api = createYoutubeApiInstance();
+
+    // Get playlist metadata
+    const playlistResponse = await api.get("/playlists", {
+      params: {
+        part: "snippet,contentDetails",
+        id: playlistId,
+      },
+    });
+
+    console.log("playlistResponse:", playlistResponse && playlistResponse.data);
+
+    if (
+      !playlistResponse.data.items ||
+      playlistResponse.data.items.length === 0
+    ) {
+      throw new Error("Playlist not found");
+    }
+
+    const playlistData = playlistResponse.data.items[0];
+
+    // Get playlist items (videos)
+    const itemsResponse = await api.get("/playlistItems", {
+      params: {
+        part: "snippet,contentDetails",
+        playlistId: playlistId,
+        maxResults: 50,
+      },
+    });
+
+    console.log("itemsResponse:", itemsResponse.data);
+
+    // Process items to match your component's expected format
+    const formattedItems = itemsResponse.data.items.map((item) => ({
+      id: item.id,
+      videoId: item.snippet.resourceId.videoId,
+      title: item.snippet.title,
+      artist: item.snippet.videoOwnerChannelTitle || "Unknown artist",
+      thumbnail: item.snippet.thumbnails?.default?.url || "",
+      dateAdded: item.snippet.publishedAt,
+      duration: 0, // YouTube API doesn't provide duration in playlistItems, would need separate video API call
+    }));
+
+    // Return combined data
+    return {
+      ...playlistData,
+      items: formattedItems,
+    };
+  } catch (error) {
+    console.error(
+      "Error fetching playlist details:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to fetch playlist details");
   }
 };
