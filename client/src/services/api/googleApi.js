@@ -3,14 +3,15 @@ import axios from "axios";
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
 const CLIENT_SECRET = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
+const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 
 // Create a new axios instance for Google API
 const createGapiInstance = (accessToken = null) => {
   const headers = accessToken
     ? { Authorization: `Bearer ${accessToken}` }
-    : { "X-Goog-Api-Key": import.meta.env.VITE_YOUTUBE_API_KEY };
+    : { "X-Goog-Api-Key": API_KEY };
 
   return axios.create({
     baseURL: BASE_URL,
@@ -52,7 +53,7 @@ const fetchUserProfile = async (accessToken) => {
     // Make request to Google's userinfo endpoint
     const response = await api.get(
       "https://www.googleapis.com/oauth2/v3/userinfo"
-    );  
+    );
 
     return response.data;
   } catch (error) {

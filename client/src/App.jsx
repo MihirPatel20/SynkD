@@ -20,6 +20,7 @@ import PlaylistDetail from "./pages/playlists/PlaylistDetail";
 import Profile from "./pages/profile/Profile";
 import Search from "./pages/search/Search";
 import Watch from "./pages/watch/Watch";
+import PlaylistManager from "./pages/playlists/PlaylistManager";
 
 const App = () => {
   const location = useLocation();
@@ -52,6 +53,14 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/playlist-manager"
+                element={
+                  <ProtectedRoute>
+                    <PlaylistManager />
                   </ProtectedRoute>
                 }
               />

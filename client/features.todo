@@ -1,14 +1,15 @@
 Playlist Manager Implementation:
-  ☐ Create `PlaylistManager` component extending `Playlists.jsx`
-     ☐ Add multi-selection functionality with checkboxes in `PlaylistCard.jsx`
-     ☐ Implement floating action bar for selected playlists
-     ☐ Add batch operations (delete, merge, share)
+  ✔ Create `PlaylistManager` component extending `Playlists.jsx` @done(25-02-27 00:24)
+     ✔ Add multi-selection functionality with checkboxes in `PlaylistCard.jsx` @done(25-02-27 00:24)
+     ✔ Implement floating action bar for selected playlists @done(25-02-27 00:24)
+     ✔ Add batch operations (delete, merge, share) @done(25-02-27 00:24)
   
   Playlist Analytics:
   ☐ Create `PlaylistAnalytics` service for tracking play counts
-     ☐ Extend `youtubeDataApi.js` to fetch video statistics
+     ☐ create `youtubeAnalyticsApi.js` which fetch video statistics.
      ☐ Implement local database (IndexedDB) for listening history
-     ☐ Add sorting functionality to `PlaylistDetail.jsx` for play count
+     ☐ Add sorting functionality to `PlaylistDetail.jsx` for play count, better if yt api can provide this.
+     ☐ Display play count in `PlaylistCard.jsx` and `PlaylistDetail.jsx`
      ☐ Create visualization components for play frequency data
   
   Play History Tracking:

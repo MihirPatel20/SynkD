@@ -1,6 +1,8 @@
 import { processResponseData } from "../../utils/formatters.js";
 import createGapiInstance from "./googleApi";
 
+const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+
 // Modified existing functions to use the factory
 export const fetchVideos = async (query, maxResults = 10) => {
   try {
@@ -14,7 +16,7 @@ export const fetchVideos = async (query, maxResults = 10) => {
         videoCategoryId: "10", // Music category
         order: "relevance",
         videoEmbeddable: true,
-        key: import.meta.env.VITE_YOUTUBE_API_KEY,
+        key: API_KEY,
       },
     });
 
@@ -44,7 +46,7 @@ export const searchPlaylists = async (query, maxResults = 10) => {
         maxResults,
         q: query,
         type: "playlist",
-        key: import.meta.env.VITE_YOUTUBE_API_KEY,
+        key: API_KEY,
       },
     });
     return response.data.items;
