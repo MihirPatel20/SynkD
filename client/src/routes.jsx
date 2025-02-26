@@ -1,6 +1,7 @@
 // routes.jsx
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Box } from "@mui/material";
 
 import Login from "./pages/auth/Login";
 import Callback from "./pages/auth/Callback";
@@ -13,7 +14,6 @@ import Search from "./pages/search/Search";
 import Watch from "./pages/watch/Watch";
 import PlaylistManager from "./pages/playlists/PlaylistManager";
 import NotFound from "./components/common/NotFound";
-import { Box } from "@mui/material";
 
 const AppRoutes = () => {
   return (

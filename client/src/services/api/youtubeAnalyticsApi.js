@@ -4,7 +4,7 @@ import axios from "axios";
 const ANALYTICS_BASE_URL = "https://youtubeanalytics.googleapis.com/v2/reports";
 
 // Create a YouTube Analytics API instance
-export const createYTAnalyticsInstance = (accessToken) => {
+const createYTAnalyticsInstance = (accessToken) => {
   if (!accessToken) {
     throw new Error("Access token is required for YouTube Analytics API");
   }
@@ -16,6 +16,8 @@ export const createYTAnalyticsInstance = (accessToken) => {
     },
   });
 };
+
+export default createYTAnalyticsInstance;
 
 // Get playlist analytics data
 export const getPlaylistAnalytics = async (playlistId, startDate, endDate) => {
@@ -53,88 +55,6 @@ export const getPlaylistAnalytics = async (playlistId, startDate, endDate) => {
   }
 };
 
-// Get top videos in a playlist
-export const getPlaylistTopVideos = async (
-  playlistId,
-  startDate,
-  endDate,
-  maxResults = 10
-) => {
-  try {
-    const accessToken = localStorage.getItem("access_token");
-    if (!accessToken) {
-      throw new Error("No access token available");
-    }
-
-    const api = createYTAnalyticsInstance(accessToken);
-
-    // Format dates if not provided
-    const formattedStartDate = startDate || "2010-01-01";
-    const formattedEndDate = endDate || new Date().toISOString().split("T")[0];
-
-    const response = await api.get("", {
-      params: {
-        ids: "channel==MINE",
-        startDate: formattedStartDate,
-        endDate: formattedEndDate,
-        metrics: "views,estimatedMinutesWatched",
-        dimensions: "video",
-        filters: `playlist==${playlistId}`,
-        sort: "-views",
-        maxResults: maxResults,
-      },
-    });
-
-    return processTopVideosData(response.data);
-  } catch (error) {
-    console.error(
-      "Error fetching playlist top videos:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch playlist top videos");
-  }
-};
-
-// Get playlist traffic sources
-export const getPlaylistTrafficSources = async (
-  playlistId,
-  startDate,
-  endDate
-) => {
-  try {
-    const accessToken = localStorage.getItem("access_token");
-    if (!accessToken) {
-      throw new Error("No access token available");
-    }
-
-    const api = createYTAnalyticsInstance(accessToken);
-
-    // Format dates if not provided
-    const formattedStartDate = startDate || "2010-01-01";
-    const formattedEndDate = endDate || new Date().toISOString().split("T")[0];
-
-    const response = await api.get("", {
-      params: {
-        ids: "channel==MINE",
-        startDate: formattedStartDate,
-        endDate: formattedEndDate,
-        metrics: "views,playlistStarts,playlistViews",
-        dimensions: "insightTrafficSourceType",
-        filters: `playlist==${playlistId}`,
-        sort: "-playlistViews",
-      },
-    });
-
-    return processTrafficSourcesData(response.data);
-  } catch (error) {
-    console.error(
-      "Error fetching playlist traffic sources:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch playlist traffic sources");
-  }
-};
-
 // Helper functions to process API response data
 const processAnalyticsData = (data) => {
   if (!data.rows || data.rows.length === 0) {
@@ -158,33 +78,56 @@ const processAnalyticsData = (data) => {
   return result;
 };
 
-const processTopVideosData = (data) => {
-  if (!data.rows || data.rows.length === 0) {
-    return [];
-  }
+// Get video analytics data
+export const getVideoAnalytics = async (videoIds, startDate, endDate) => {
+  try {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      throw new Error("No access token available");
+    }
 
-  const headers = data.columnHeaders.map((header) => header.name);
+    const api = createYTAnalyticsInstance(accessToken);
 
-  return data.rows.map((row) => {
-    const result = {};
-    headers.forEach((header, index) => {
-      result[header] = row[index];
+    // Format dates if not provided
+    const formattedStartDate = startDate || "2010-01-01";
+    const formattedEndDate = endDate || new Date().toISOString().split("T")[0];
+
+    // Join video IDs with commas for the filter
+    const videoIdsFilter = videoIds.join(",");
+
+    const response = await api.get("", {
+      params: {
+        ids: "channel==MINE",
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+        metrics:
+          "views,estimatedMinutesWatched,likes,dislikes,comments,shares,averageViewDuration,averageViewPercentage",
+        dimensions: "video",
+        filters: `video==${videoIdsFilter}`,
+        sort: "-views", // Sort by views in descending order
+      },
     });
-    return result;
-  });
+
+    return processVideoAnalyticsData(response.data);
+  } catch (error) {
+    console.error(
+      "Error fetching video analytics:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to fetch video analytics");
+  }
 };
 
-const processTrafficSourcesData = (data) => {
+// Helper function to process video analytics data
+const processVideoAnalyticsData = (data) => {
   if (!data.rows || data.rows.length === 0) {
     return [];
   }
 
-  const headers = data.columnHeaders.map((header) => header.name);
-
   return data.rows.map((row) => {
     const result = {};
-    headers.forEach((header, index) => {
-      result[header] = row[index];
+    data.columnHeaders.forEach((header, index) => {
+      result[header.name] = row[index];
     });
     return result;
   });
