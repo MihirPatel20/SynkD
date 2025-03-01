@@ -1,61 +1,70 @@
+// src/services/recommendationsService.js
+
 import { processResponseData } from "../../utils/formatters";
 import createYTDataInstance from "../api/youtubeDataApi";
 import cacheService from "../cache/cacheService";
+import { fetchWithCache, handleApiError } from "../../utils/apiUtils";
+import axios from "axios";
 
-// Rate limit state
-let rateLimit = {
-  tokens: 100,
-  lastRefill: Date.now(),
-  refillRate: 100 / (60 * 1000), // 100 tokens per minute
-};
+// Rate limit service
+class RateLimitService {
+  constructor(tokensPerMinute = 100) {
+    this.rateLimit = {
+      tokens: tokensPerMinute,
+      lastRefill: Date.now(),
+      refillRate: tokensPerMinute / (60 * 1000),
+    };
+  }
 
-const checkRateLimit = () => {
-  const now = Date.now();
-  const timePassed = now - rateLimit.lastRefill;
-  const tokensToAdd = timePassed * rateLimit.refillRate;
-  rateLimit.tokens = Math.min(100, rateLimit.tokens + tokensToAdd);
-  rateLimit.lastRefill = now;
+  checkRateLimit() {
+    const now = Date.now();
+    const timePassed = now - this.rateLimit.lastRefill;
+    const tokensToAdd = timePassed * this.rateLimit.refillRate;
 
-  if (rateLimit.tokens < 1) return false;
-  rateLimit.tokens -= 1;
-  return true;
-};
+    this.rateLimit.tokens = Math.min(100, this.rateLimit.tokens + tokensToAdd);
+    this.rateLimit.lastRefill = now;
+
+    if (this.rateLimit.tokens < 1) return false;
+
+    this.rateLimit.tokens -= 1;
+    return true;
+  }
+
+  async waitForRateLimit() {
+    while (!this.checkRateLimit()) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    return true;
+  }
+}
+
+const rateLimitService = new RateLimitService();
 
 export const getHomeRecommendations = async (signal = null) => {
   const cacheKey = "home_recommendations";
-  const cached = cacheService.get(cacheKey);
 
-  if (cached) return cached;
+  return fetchWithCache(
+    async () => {
+      await rateLimitService.waitForRateLimit();
 
-  if (!checkRateLimit()) {
-    throw new Error("Rate limit exceeded. Please try again later.");
-  }
+      const accessToken = localStorage.getItem("access_token");
+      const api = createYTDataInstance(accessToken);
+      const popularResponse = await api.get("/videos", {
+        params: {
+          part: "snippet,statistics",
+          chart: "mostPopular",
+          videoCategoryId: "10",
+          maxResults: 5,
+        },
+        signal,
+      });
 
-  try {
-    const accessToken = localStorage.getItem("access_token");
-    const api = createYTDataInstance(accessToken);
-
-    const popularResponse = await api.get("/videos", {
-      params: {
-        part: "snippet,statistics",
-        chart: "mostPopular",
-        videoCategoryId: "10",
-        maxResults: 5,
-      },
-      signal, // Add signal parameter
-    });
-
-    const recommendations = processResponseData(popularResponse.data.items, []);
-    cacheService.set(cacheKey, recommendations);
-    return recommendations;
-  } catch (error) {
-    if (axios.isCancel(error)) {
-      console.log("Request canceled:", error.message);
-      return [];
-    }
-    console.error("Error fetching recommendations:", error);
-    throw new Error("Failed to fetch recommendations");
-  }
+      return processResponseData(popularResponse.data.items, []);
+    },
+    cacheKey,
+    {},
+    signal
+  ).catch((error) => handleApiError(error, "fetch recommendations"));
 };
 
 export default {

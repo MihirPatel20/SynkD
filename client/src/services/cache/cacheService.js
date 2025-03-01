@@ -7,6 +7,12 @@ const CACHE_STORAGE_KEY = "app_cache_data";
 class CacheService {
   constructor(cacheDuration = DEFAULT_CACHE_DURATION) {
     this.cacheDuration = cacheDuration;
+    this.stats = {
+      hits: 0,
+      misses: 0,
+      sets: 0,
+      deletes: 0
+    };
     this._loadCacheFromStorage();
   }
 
@@ -36,6 +42,7 @@ class CacheService {
     if (cached && Date.now() - cached.timestamp < this.cacheDuration) {
       // Update access timestamp for LRU implementation
       cached.lastAccessed = Date.now();
+      this.stats.hits++;
       this._saveCacheToStorage();
       return cached.data;
     }
@@ -45,7 +52,7 @@ class CacheService {
       this.cache.delete(key);
       this._saveCacheToStorage();
     }
-
+    this.stats.misses++;
     return null;
   }
 
@@ -60,7 +67,7 @@ class CacheService {
       timestamp: Date.now(),
       lastAccessed: Date.now(),
     });
-
+    this.stats.sets++;
     this._saveCacheToStorage();
   }
 
@@ -68,7 +75,6 @@ class CacheService {
     // Find least recently used item
     let oldestKey = null;
     let oldestTime = Date.now();
-
     for (const [k, v] of this.cache.entries()) {
       if (v.lastAccessed < oldestTime) {
         oldestTime = v.lastAccessed;
@@ -84,15 +90,48 @@ class CacheService {
 
   clear() {
     this.cache.clear();
+    this.stats.deletes += this.cache.size;
     localStorage.removeItem(CACHE_STORAGE_KEY);
   }
 
   delete(key) {
     this.cache.delete(key);
+    this.stats.deletes++;
     this._saveCacheToStorage();
+  }
+
+  getKeysByPattern(pattern) {
+    const regex = new RegExp(pattern);
+    const matchingKeys = [];
+    
+    for (const key of this.cache.keys()) {
+      if (regex.test(key)) {
+        matchingKeys.push(key);
+      }
+    }
+    
+    return matchingKeys;
+  }
+
+  invalidateByAge(maxAge) {
+    const now = Date.now();
+    let deletedCount = 0;
+    for (const [key, value] of this.cache.entries()) {
+      if (now - value.timestamp > maxAge) {
+        this.cache.delete(key);
+        deletedCount++;
+      }
+    }
+    if (deletedCount > 0) {
+      this.stats.deletes += deletedCount;
+      this._saveCacheToStorage();
+    }
+    return deletedCount;
   }
 }
 
 // Create a singleton instance
 const cacheService = new CacheService();
+
 export default cacheService;
+export { CacheService };

@@ -1,6 +1,18 @@
 // src/utils/apiUtils.js
+
 import axios from "axios";
-import cacheService from "../services/cache/cacheService";
+import cacheService, { CacheService } from "../services/cache/cacheService";
+
+// Error handler
+export const handleApiError = (error, operation) => {
+  if (axios.isCancel(error)) {
+    console.log("Request canceled:", error.message);
+    return null;
+  }
+
+  console.error(`Error ${operation}:`, error.response?.data || error.message);
+  throw new Error(`Failed to ${operation}`);
+};
 
 export const fetchWithCache = async (
   fetchFunction,
@@ -17,12 +29,9 @@ export const fetchWithCache = async (
   }
 
   console.log(`Cache miss for key: ${cacheKey}, fetching from API...`);
-
   try {
     // If not in cache, make the API call
-    const result = Array.isArray(params)
-      ? await fetchFunction(...params, signal)
-      : await fetchFunction(params, signal);
+    const result = await fetchFunction();
 
     // Cache the result with custom duration if provided
     if (cacheDuration) {
@@ -49,9 +58,10 @@ export const fetchWithCache = async (
 export const clearCache = (keyPattern) => {
   // If keyPattern is provided, clear only matching keys
   if (keyPattern) {
-    // This is a simple implementation - for a more advanced approach,
-    // you would need to iterate through all keys in the cache
-    cacheService.delete(keyPattern);
+    const matchingKeys = cacheService.getKeysByPattern(keyPattern);
+    for (const key of matchingKeys) {
+      cacheService.delete(key);
+    }
   } else {
     // Clear all cache
     cacheService.clear();
