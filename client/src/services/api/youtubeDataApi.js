@@ -1,5 +1,7 @@
+// src/services/api/youtubeDataApi.js
 import { processResponseData } from "../../utils/formatters.js";
 import axios from "axios";
+import cacheService from "../cache/cacheService";
 
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
 const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
@@ -18,7 +20,15 @@ const createYTDataInstance = (accessToken = null) => {
 
 export default createYTDataInstance;
 
-export const fetchVideos = async (query, maxResults = 10) => {
+export const fetchVideos = async (query, maxResults = 10, signal = null) => {
+  // Create a cache key based on the query parameters
+  const cacheKey = `videos_${query}_${maxResults}`;
+  const cachedData = cacheService.get(cacheKey);
+
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
     const api = createYTDataInstance();
     const response = await api.get("/search", {
@@ -32,13 +42,22 @@ export const fetchVideos = async (query, maxResults = 10) => {
         videoEmbeddable: true,
         key: API_KEY,
       },
+      signal,
     });
 
-    // format the response data
+    // Format the response data
     const formattedData = processResponseData(response.data.items);
+
+    // Cache the result
+    cacheService.set(cacheKey, formattedData);
 
     return formattedData;
   } catch (error) {
+    if (axios.isCancel(error)) {
+      console.log("Request canceled:", error.message);
+      return [];
+    }
+
     console.error(
       "Error fetching videos:",
       error.response?.data || error.message
@@ -47,7 +66,15 @@ export const fetchVideos = async (query, maxResults = 10) => {
   }
 };
 
-export const getVideoDetails = async (videoId) => {
+export const getVideoDetails = async (videoId, signal = null) => {
+  // Create a cache key based on the video ID
+  const cacheKey = `video_details_${videoId}`;
+  const cachedData = cacheService.get(cacheKey);
+
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
     const api = createYTDataInstance();
     const response = await api.get("/videos", {
@@ -55,10 +82,21 @@ export const getVideoDetails = async (videoId) => {
         part: "snippet,statistics,contentDetails",
         id: videoId,
       },
+      signal,
     });
 
-    return response.data.items[0];
+    const videoData = response.data.items[0];
+
+    // Cache the result
+    cacheService.set(cacheKey, videoData);
+
+    return videoData;
   } catch (error) {
+    if (axios.isCancel(error)) {
+      console.log("Request canceled:", error.message);
+      return null;
+    }
+
     console.error("Error fetching video details:", error);
     throw error;
   }
@@ -66,6 +104,14 @@ export const getVideoDetails = async (videoId) => {
 
 // Get user's playlists (requires OAuth)
 export const getUserPlaylists = async (accessToken, maxResults = 10) => {
+  // Create a cache key based on the access token (or user ID if available)
+  const cacheKey = `user_playlists_${accessToken.substring(0, 10)}`;
+  const cachedData = cacheService.get(cacheKey);
+
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
     const api = createYTDataInstance(accessToken);
     let allPlaylists = [];
@@ -85,6 +131,9 @@ export const getUserPlaylists = async (accessToken, maxResults = 10) => {
       nextPageToken = response.data.nextPageToken;
     } while (nextPageToken);
 
+    // Cache the result
+    cacheService.set(cacheKey, allPlaylists);
+
     return allPlaylists;
   } catch (error) {
     console.error(
@@ -97,6 +146,14 @@ export const getUserPlaylists = async (accessToken, maxResults = 10) => {
 
 // Get playlist details and items
 export const getPlaylistDetails = async (playlistId) => {
+  // Create a cache key based on the playlist ID
+  const cacheKey = `playlist_details_${playlistId}`;
+  const cachedData = cacheService.get(cacheKey);
+
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
     const api = createYTDataInstance();
 
@@ -134,14 +191,19 @@ export const getPlaylistDetails = async (playlistId) => {
       artist: item.snippet.videoOwnerChannelTitle || "Unknown artist",
       thumbnail: item.snippet.thumbnails?.default?.url || "",
       dateAdded: item.snippet.publishedAt,
-      duration: 0, // YouTube API doesn't provide duration in playlistItems, would need separate video API call
+      duration: 0, // YouTube API doesn't provide duration in playlistItems
     }));
 
     // Return combined data
-    return {
+    const result = {
       ...playlistData,
       items: formattedItems,
     };
+
+    // Cache the result
+    cacheService.set(cacheKey, result);
+
+    return result;
   } catch (error) {
     console.error(
       "Error fetching playlist details:",

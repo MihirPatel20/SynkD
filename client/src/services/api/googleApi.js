@@ -1,3 +1,6 @@
+// src/services/api/googleApi.js
+import cacheService from "../cache/cacheService";
+
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
@@ -25,8 +28,16 @@ const getTokens = async (code) => {
   return response.json();
 };
 
-// Fetch user profile
+// Fetch user profile with caching
 const fetchUserProfile = async (accessToken) => {
+  // Create a cache key based on the access token
+  const cacheKey = `user_profile_${accessToken.substring(0, 10)}`;
+  const cachedData = cacheService.get(cacheKey);
+
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
     const response = await fetch(
       "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -42,7 +53,12 @@ const fetchUserProfile = async (accessToken) => {
       throw new Error("Failed to fetch user profile");
     }
 
-    return response.json();
+    const userData = await response.json();
+
+    // Cache the result (user profiles don't change often, so we could use a longer cache duration)
+    cacheService.set(cacheKey, userData);
+
+    return userData;
   } catch (error) {
     console.error("Error fetching user profile:", error);
     throw error;
