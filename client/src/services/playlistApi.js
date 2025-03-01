@@ -1,4 +1,4 @@
-import { getVideoAnalytics } from "./api/youtubeAnalyticsApi";
+import { getVideoDetails } from "./api/youtubeAnalyticsApi";
 import { getPlaylistDetails } from "./api/youtubeDataApi";
 
 export const getPlaylistVideoDetails = async (
@@ -19,7 +19,7 @@ export const getPlaylistVideoDetails = async (
     console.log("Video IDs:", videoIds);
 
     // Fetch analytics for all videos in the playlist
-    const videoAnalytics = await getVideoAnalytics(
+    const videoAnalytics = await getVideoDetails(
       videoIds,
       startDate,
       endDate

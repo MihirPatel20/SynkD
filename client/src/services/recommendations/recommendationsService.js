@@ -57,13 +57,14 @@ export const getHomeRecommendations = async () => {
     const accessToken = localStorage.getItem("access_token");
     const api = createYTDataInstance(accessToken);
 
+    /**
     const [activitiesResponse, popularResponse, subscriptionsResponse] =
       await Promise.all([
         api.get("/activities", {
           params: {
             part: "snippet,contentDetails",
             mine: true,
-            maxResults: 25,
+            maxResults: 05,
           },
         }),
         api.get("/videos", {
@@ -71,14 +72,14 @@ export const getHomeRecommendations = async () => {
             part: "snippet,statistics",
             chart: "mostPopular",
             videoCategoryId: "10",
-            maxResults: 25,
+            maxResults: 05,
           },
         }),
         api.get("/subscriptions", {
           params: {
             part: "snippet",
             mine: true,
-            maxResults: 25,
+            maxResults: 05,
           },
         }),
       ]);
@@ -87,6 +88,18 @@ export const getHomeRecommendations = async () => {
       [...activitiesResponse.data.items, ...popularResponse.data.items],
       subscriptionsResponse.data.items
     );
+    */
+
+    const popularResponse = await api.get("/videos", {
+      params: {
+        part: "snippet,statistics",
+        chart: "mostPopular",
+        videoCategoryId: "10",
+        maxResults: 5,
+      },
+    });
+
+    const recommendations = processResponseData(popularResponse.data.items, []);
 
     setCache(cacheKey, recommendations);
     return recommendations;

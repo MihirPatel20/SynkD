@@ -14,7 +14,7 @@ const VideoList = ({ videos, compact = false }) => {
       {videos.map((video) => (
         <Card
           key={video.id}
-          onClick={() => handleVideoSelect(video.id.videoId)}
+          onClick={() => handleVideoSelect(video.id)}
           sx={{
             display: "flex",
             mb: 1,

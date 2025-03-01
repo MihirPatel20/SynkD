@@ -18,7 +18,6 @@ const createYTDataInstance = (accessToken = null) => {
 
 export default createYTDataInstance;
 
-// Modified existing functions to use the factory
 export const fetchVideos = async (query, maxResults = 10) => {
   try {
     const api = createYTDataInstance();
@@ -48,26 +47,20 @@ export const fetchVideos = async (query, maxResults = 10) => {
   }
 };
 
-// Search playlists
-export const searchPlaylists = async (query, maxResults = 10) => {
+export const getVideoDetails = async (videoId) => {
   try {
     const api = createYTDataInstance();
-    const response = await api.get("/search", {
+    const response = await api.get("/videos", {
       params: {
-        part: "snippet",
-        maxResults,
-        q: query,
-        type: "playlist",
-        key: API_KEY,
+        part: "snippet,statistics,contentDetails",
+        id: videoId,
       },
     });
-    return response.data.items;
+
+    return response.data.items[0];
   } catch (error) {
-    console.error(
-      "Error searching playlists:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to search playlists");
+    console.error("Error fetching video details:", error);
+    throw error;
   }
 };
 
