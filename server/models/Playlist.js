@@ -24,6 +24,12 @@ const PlaylistSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  channelId: {
+    type: String,
+  },
+  channelTitle: {
+    type: String,
+  },
   lastSynced: {
     type: Date,
     default: Date.now,

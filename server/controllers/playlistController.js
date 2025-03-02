@@ -22,7 +22,7 @@ export const getPlaylists = async (req, res) => {
     const response = await youtube.playlists.list({
       part: "snippet,contentDetails",
       mine: true,
-      maxResults: 50,
+      maxResults: 5,
     });
 
     // Store playlists in database
@@ -36,6 +36,8 @@ export const getPlaylists = async (req, res) => {
           description: item.snippet.description,
           thumbnail: item.snippet.thumbnails.default.url,
           itemCount: item.contentDetails.itemCount,
+          channelId: item.snippet.channelId,
+          channelTitle: item.snippet.channelTitle,
           lastSynced: new Date(),
         },
         { upsert: true, new: true }
@@ -45,7 +47,11 @@ export const getPlaylists = async (req, res) => {
     // Get updated playlists from database
     const playlists = await Playlist.find({ user: user._id });
 
-    res.json(playlists);
+    res.json({
+      playlists,
+      nextPageToken: response.data.nextPageToken,
+      prevPageToken: response.data.prevPageToken,
+    });
   } catch (error) {
     console.error("Error fetching playlists:", error);
     res.status(500).json({ error: "Failed to fetch playlists" });

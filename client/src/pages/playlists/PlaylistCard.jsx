@@ -1,4 +1,3 @@
-// src/components/playlists/PlaylistCard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -39,12 +38,11 @@ const PlaylistCard = ({
 
   useEffect(() => {
     const fetchPlayCount = async () => {
-      if (playlist && playlist.id) {
-        const history = await getPlaylistHistory(playlist.id);
+      if (playlist && playlist.youtubePlaylistId) {
+        const history = await getPlaylistHistory(playlist.youtubePlaylistId);
         setPlayCount(history.length);
       }
     };
-
     fetchPlayCount();
   }, [playlist]);
 
@@ -58,13 +56,13 @@ const PlaylistCard = ({
   };
 
   const handleAction = (action) => (event) => {
+    console.log(`${action} playlist:`, playlist.youtubePlaylistId);
     event.stopPropagation();
     handleClose();
-    console.log(`${action} playlist:`, playlist.id);
   };
 
   const handleCardClick = () => {
-    navigate(`/playlist/${playlist.id}`);
+    navigate(`/playlist/${playlist.youtubePlaylistId}`);
   };
 
   return (
@@ -78,6 +76,7 @@ const PlaylistCard = ({
         transition: "transform 0.3s ease-in-out",
         "&:hover": {
           transform: "translateY(-5px)",
+          cursor: "pointer",
           boxShadow: 6,
         },
       }}
@@ -93,57 +92,45 @@ const PlaylistCard = ({
           }}
         />
       )}
-
       <CardMedia
         component="img"
         sx={{ height: 140, objectFit: "cover" }}
         image={
-          playlist.snippet.thumbnails?.high?.url ||
+          playlist.thumbnail ||
           "https://via.placeholder.com/320x180?text=No+Thumbnail"
         }
-        alt={playlist.snippet.title}
+        alt={playlist.title}
       />
 
-      <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+      <CardContent>
+        <Typography variant="h6" component="div" noWrap>
+          {playlist.title}
+        </Typography>
+
+        <Box sx={{ display: "flex", justifyContent: "space-between", my: 1 }}>
           <Chip
             icon={<MusicNoteIcon />}
-            label={`${playlist.contentDetails?.itemCount || 0} items`}
+            label={`${playlist.itemCount || 0} items`}
             size="small"
-            sx={{
-              bgcolor: "rgba(255, 255, 255, 0.2)",
-              color: "white",
-              "& .MuiChip-icon": {
-                color: "white",
-              },
-            }}
           />
-
           <Chip
             icon={<HeadphonesIcon />}
             label={`${playCount} plays`}
             size="small"
-            color="secondary"
             sx={{ ml: 1 }}
           />
         </Box>
-
-        <Typography variant="h6" component="div" noWrap>
-          {playlist.snippet.title}
-        </Typography>
-
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ mb: 1 }}
           noWrap
+          sx={{ mt: 1 }}
         >
-          {playlist.snippet.description || "No description"}
+          {playlist.description || "No description"}
         </Typography>
-
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
           Created{" "}
-          {formatDistanceToNow(new Date(playlist.snippet.publishedAt), {
+          {formatDistanceToNow(new Date(playlist.createdAt), {
             addSuffix: true,
           })}
         </Typography>
@@ -153,8 +140,6 @@ const PlaylistCard = ({
         sx={{ display: "flex", justifyContent: "space-between", p: 1, pt: 0 }}
       >
         <IconButton
-          size="small"
-          color="primary"
           onClick={(e) => {
             e.stopPropagation();
             // Implement play functionality
@@ -163,8 +148,12 @@ const PlaylistCard = ({
         >
           <PlayArrowIcon />
         </IconButton>
-
-        <IconButton size="small" onClick={handleClick}>
+        <IconButton
+          onClick={(e) => {
+            handleClick(e);
+            e.stopPropagation();
+          }}
+        >
           <MoreVertIcon />
         </IconButton>
 

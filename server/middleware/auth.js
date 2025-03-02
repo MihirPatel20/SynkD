@@ -8,31 +8,33 @@ const auth = async (req, res, next) => {
 
     // Check if no token
     if (!token) {
-      return res.status(401).json({ msg: "No token, authorization denied" });
+      return res
+        .status(401)
+        .json({ message: "No token, authorization denied" });
     }
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Find user by id
-    const user = await User.findById(decoded.user.id);
+    const user = await User.findById(decoded.user._id);
 
     if (!user) {
-      return res.status(401).json({ msg: "Token is not valid" });
+      return res.status(401).json({ message: "Token is not valid" });
     }
 
     // Check if token is expired
     if (user.tokenExpiry < new Date()) {
       return res
         .status(401)
-        .json({ msg: "Token has expired, please login again" });
+        .json({ message: "Token has expired, please login again" });
     }
 
     // Add user to request
     req.user = user;
     next();
   } catch (err) {
-    res.status(401).json({ msg: "Token is not valid" });
+    res.status(401).json({ message: "Token is not valid" });
   }
 };
 

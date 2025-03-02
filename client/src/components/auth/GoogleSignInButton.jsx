@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button, CircularProgress } from "@mui/material";
 import { useGoogleLogin } from "@react-oauth/google";
 import GoogleIcon from "@mui/icons-material/Google";
-import axios from "axios";
 
 import { useAuth } from "../../context/AuthContext";
 import { useSnackbar } from "../../context/SnackbarContext";
 import sessionManager from "../../services/auth/sessionManager";
+import api from "../../api";
 
 const GoogleSignInButton = ({
   buttonText = "Sign in with Google",
@@ -24,19 +24,16 @@ const GoogleSignInButton = ({
     onSuccess: async (codeResponse) => {
       try {
         setLoading(true);
-        console.log("Login successful", codeResponse);
 
         // Exchange code for tokens via your backend
-        const response = await axios.post(
-          "http://localhost:5000/api/auth/google/callback",
-          {
-            code: codeResponse.code,
-          }
-        );
-        console.log('Login successful:', response.data);
+        const response = await api.post("/auth/google/callback", {
+          code: codeResponse.code,
+        });
+        console.log("Login successful:", response.data);
 
         // Store token securely
         localStorage.setItem("access_token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
 
         // Initialize session
         sessionManager.initialize();

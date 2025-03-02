@@ -2,6 +2,12 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: false,
+  sameSite: "none",
+};
+
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
@@ -52,16 +58,19 @@ export const handleGoogleCallback = async (req, res) => {
 
     await user.save();
 
-    const sessionToken = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    console.log("User:", user); // Log user for debugging
 
-    res.json({
-      token: sessionToken,
-      user: { id: user._id, email: user.email, name: user.name },
+    const sessionToken = jwt.sign({ user: user }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
     });
+
+    res
+      .cookie("access_token", tokens.access_token, cookieOptions)
+      .cookie("refresh_token", tokens.refresh_token || "", cookieOptions)
+      .json({
+        token: sessionToken,
+        user: { id: user._id, email: user.email, name: user.name },
+      });
   } catch (error) {
     console.error("Authentication error:", error);
     if (error.message.includes("invalid_grant")) {
