@@ -1,6 +1,104 @@
-# SynkD: 
+# SynkD
 
-## YouTube Music Playlist Manager: Technical Requirements Document
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- MongoDB
+- Google Cloud Platform account with YouTube Data API enabled
+
+### Installation
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/MihirPatel20/SynkD.git
+   cd SynkD
+   ```
+
+2. **Install dependencies for both client and server:**
+
+   ```bash
+   # Install server dependencies
+   cd server
+   npm install
+
+   # Install client dependencies
+   cd ../client
+   npm install
+   ```
+
+3. **Set up environment variables:**
+
+   Create a `.env` file in the server directory:
+
+   ```plaintext
+   # Server Configuration
+   PORT=5000
+   NODE_ENV=development
+
+   # MongoDB Connection
+   MONGO_URI=mongodb://localhost:27017/synkd
+
+   # JWT Secret
+   JWT_SECRET=your_jwt_secret_key_here
+
+   # Google OAuth
+   GOOGLE_CLIENT_ID=your_google_client_id_here
+   GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+   GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
+
+   # YouTube API
+   YOUTUBE_API_KEY=your_youtube_api_key_here
+   ```
+
+   Create a `.env` file in the client directory:
+
+   ```plaintext
+   VITE_API_URL=http://localhost:5000/api
+   VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
+   ```
+
+4. **Run the application:**
+
+   ```bash
+   # Start the server (from server directory)
+   npm start
+
+   # Start the client (from client directory)
+   npm start
+   ```
+
+   The client application will be available at `http://localhost:3000` and the server at `http://localhost:5000`.
+
+## Project Structure
+
+```
+root/
+├── client/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── .env
+│   └── package.json
+│
+├── server/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── .env
+│   └── package.json
+└── README.md
+```
 
 ## Problem Statement
 
