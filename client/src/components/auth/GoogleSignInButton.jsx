@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button, CircularProgress } from "@mui/material";
 import { useGoogleLogin } from "@react-oauth/google";
 import GoogleIcon from "@mui/icons-material/Google";
+import axios from "axios";
 
 import { useAuth } from "../../context/AuthContext";
 import { useSnackbar } from "../../context/SnackbarContext";
 import sessionManager from "../../services/auth/sessionManager";
-import { fetchUserProfile } from "../../services/api/googleApi";
 
 const GoogleSignInButton = ({
   buttonText = "Sign in with Google",
@@ -21,17 +21,22 @@ const GoogleSignInButton = ({
   const [loading, setLoading] = useState(false);
 
   const login = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
+    onSuccess: async (codeResponse) => {
       try {
         setLoading(true);
-        console.log("Login successful", tokenResponse);
+        console.log("Login successful", codeResponse);
 
-        // Store tokens securely
-        localStorage.setItem("access_token", tokenResponse.access_token);
+        // Exchange code for tokens via your backend
+        const response = await axios.post(
+          "http://localhost:5000/api/auth/google/callback",
+          {
+            code: codeResponse.code,
+          }
+        );
+        console.log('Login successful:', response.data);
 
-        // Fetch user profile information
-        const userData = await fetchUserProfile(tokenResponse.access_token);
-        setUser(userData);
+        // Store token securely
+        localStorage.setItem("access_token", response.data.token);
 
         // Initialize session
         sessionManager.initialize();
@@ -39,10 +44,11 @@ const GoogleSignInButton = ({
 
         // Update authentication state
         setIsAuthenticated(true);
+        setUser(response.data.user);
 
         // Call optional callback if provided
         if (onLoginSuccess) {
-          onLoginSuccess(tokenResponse);
+          onLoginSuccess(response.data);
         }
 
         // Show success message using global snackbar
@@ -71,9 +77,7 @@ const GoogleSignInButton = ({
         onLoginFailure(errorResponse);
       }
     },
-    scope:
-      "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly",
-    flow: "implicit",
+    flow: "auth-code",
   });
 
   return (

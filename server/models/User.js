@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
   },
   refreshToken: {
     type: String,
-    required: true,
+    default: "", // Changed to default empty string
   },
   tokenExpiry: {
     type: Date,

@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  getGoogleAuthURL,
+  // getGoogleAuthURL,
   handleGoogleCallback,
   getCurrentUser,
 } from "../controllers/authController.js";
@@ -11,7 +11,7 @@ const router = express.Router();
 // @route   GET /api/auth/google
 // @desc    Get Google OAuth URL
 // @access  Public
-router.get("/google", getGoogleAuthURL);
+// router.get("/google", getGoogleAuthURL);
 
 // @route   POST /api/auth/google/callback
 // @desc    Handle Google OAuth callback

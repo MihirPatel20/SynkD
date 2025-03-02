@@ -1,116 +1,91 @@
-import { google } from "googleapis";
+import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-// Create OAuth2 client
-const createOAuth2Client = () => {
-  return new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
-  );
-};
+const client = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+);
 
-// @desc    Get Google OAuth URL
-// @route   GET /api/auth/google
-// @access  Public
-export const getGoogleAuthURL = (req, res) => {
-  const oauth2Client = createOAuth2Client();
-
-  const scopes = [
-    "https://www.googleapis.com/auth/userinfo.profile",
-    "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/youtube.readonly",
-  ];
-
-  const url = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    prompt: "consent",
-    scope: scopes,
-  });
-
-  res.json({ url });
-};
-
-// @desc    Handle Google OAuth callback
-// @route   POST /api/auth/google/callback
-// @access  Public
 export const handleGoogleCallback = async (req, res) => {
   const { code } = req.body;
-  const oauth2Client = createOAuth2Client();
 
   try {
-    // Exchange code for tokens
-    const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
+    const { tokens } = await client.getToken(code);
+    console.log("Tokens:", tokens); // Log tokens for debugging
 
-    // Get user info
-    const oauth2 = google.oauth2({
-      auth: oauth2Client,
-      version: "v2",
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
+    const payload = ticket.getPayload();
 
-    const userInfo = await oauth2.userinfo.get();
+    let expiryDate;
+    if (tokens.expires_in && typeof tokens.expires_in === "number") {
+      expiryDate = new Date(Date.now() + tokens.expires_in * 1000);
+    } else {
+      // Set a default expiry (e.g., 1 hour from now)
+      expiryDate = new Date(Date.now() + 3600000);
+    }
+    console.log("Calculated expiry date:", expiryDate); // Log expiry date for debugging
 
-    // Calculate token expiry
-    const expiryDate = new Date();
-    expiryDate.setSeconds(expiryDate.getSeconds() + tokens.expires_in);
-
-    // Find or create user
-    let user = await User.findOne({ googleId: userInfo.data.id });
+    let user = await User.findOne({ googleId: payload.sub });
 
     if (user) {
-      // Update existing user
       user.accessToken = tokens.access_token;
-      user.refreshToken = tokens.refresh_token || user.refreshToken; // Only update if new refresh token provided
+      user.refreshToken = tokens.refresh_token || user.refreshToken;
       user.tokenExpiry = expiryDate;
-      await user.save();
+      console.log(`User ${user.email} authenticated successfully`);
     } else {
-      // Create new user
-      user = await User.create({
-        googleId: userInfo.data.id,
-        email: userInfo.data.email,
-        name: userInfo.data.name,
-        profileImage: userInfo.data.picture,
+      user = new User({
+        googleId: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        profileImage: payload.picture,
         accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
+        refreshToken: tokens.refresh_token || "", // Handle case where refresh_token might be undefined
         tokenExpiry: expiryDate,
       });
+      console.log(`New user created: ${user.email}`);
     }
 
-    // Create JWT
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
+    await user.save();
 
-    jwt.sign(
-      payload,
+    const sessionToken = jwt.sign(
+      { userId: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token });
-      }
+      { expiresIn: "7d" }
     );
+
+    res.json({
+      token: sessionToken,
+      user: { id: user._id, email: user.email, name: user.name },
+    });
   } catch (error) {
-    console.error("Auth error:", error);
-    res.status(500).json({ error: "Authentication failed" });
+    console.error("Authentication error:", error);
+    if (error.message.includes("invalid_grant")) {
+      return res
+        .status(400)
+        .json({ error: "Invalid or expired authorization code" });
+    }
+    res
+      .status(500)
+      .json({ error: "Authentication failed", details: error.message });
   }
 };
 
-// @desc    Get current user
-// @route   GET /api/auth/me
-// @access  Private
 export const getCurrentUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(
       "-accessToken -refreshToken"
     );
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
     res.json(user);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error fetching current user:", error);
+    res.status(500).json({ error: "Server error", details: error.message });
   }
 };
