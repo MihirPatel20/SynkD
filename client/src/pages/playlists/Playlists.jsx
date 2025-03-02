@@ -31,7 +31,7 @@ const Playlists = () => {
       try {
         const accessToken = localStorage.getItem("access_token");
         const userPlaylists = await getUserPlaylists(accessToken);
-        
+
         setPlaylists(userPlaylists);
         setFilteredPlaylists(userPlaylists);
       } catch (error) {

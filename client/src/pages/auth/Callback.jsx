@@ -1,10 +1,10 @@
 // src/pages/Callback.jsx
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Box, CircularProgress } from '@mui/material';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Box, CircularProgress } from "@mui/material";
 
-import { useAuth } from '../../context/AuthContext';
-import { getTokens } from '../../services/api/googleApi';
+import { useAuth } from "../../context/AuthContext";
+import { getTokens } from "../../services/api/googleApi";
 
 const Callback = () => {
   const navigate = useNavigate();
@@ -13,25 +13,25 @@ const Callback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
+      const code = urlParams.get("code");
 
       if (code) {
         try {
           const tokens = await getTokens(code);
           // Store tokens securely
-          localStorage.setItem('access_token', tokens.access_token);
+          localStorage.setItem("access_token", tokens.access_token);
           if (tokens.refresh_token) {
-            localStorage.setItem('refresh_token', tokens.refresh_token);
+            localStorage.setItem("refresh_token", tokens.refresh_token);
           }
-          
+
           setIsAuthenticated(true);
-          navigate('/');
+          navigate("/");
         } catch (error) {
-          console.error('Error during authentication:', error);
-          navigate('/login');
+          console.error("Error during authentication:", error);
+          navigate("/login");
         }
       } else {
-        navigate('/login');
+        navigate("/login");
       }
     };
 

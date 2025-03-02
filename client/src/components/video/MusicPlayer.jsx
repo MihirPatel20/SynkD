@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 const MusicPlayer = ({ videoId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { videoId: urlVideoId } = useParams();
-  
+
   const currentVideoId = videoId || urlVideoId;
 
   useEffect(() => {

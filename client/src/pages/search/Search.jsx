@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Container, Typography, Alert } from '@mui/material';
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Container, Typography, Alert } from "@mui/material";
 
-import VideoGrid from '../../components/video/VideoGrid.jsx';
-import { fetchVideos } from '../../services/api/youtubeDataApi.js';
+import VideoGrid from "../../components/video/VideoGrid.jsx";
+import { fetchVideos } from "../../services/api/youtubeDataApi.js";
 
 const Search = () => {
   const [searchParams] = useSearchParams();
-  const query = searchParams.get('q');
+  const query = searchParams.get("q");
   const [videos, setVideos] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -15,14 +15,14 @@ const Search = () => {
   useEffect(() => {
     const searchVideos = async () => {
       if (!query) return;
-      
+
       setLoading(true);
       try {
         const results = await fetchVideos(query);
         setVideos(results);
         setError(null);
       } catch (err) {
-        setError('Failed to fetch videos. Please try again later.');
+        setError("Failed to fetch videos. Please try again later.");
         setVideos([]);
       } finally {
         setLoading(false);
@@ -45,9 +45,13 @@ const Search = () => {
       <Typography variant="h5" gutterBottom>
         Search results for: {query}
       </Typography>
-      
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
       {loading ? (
         <Typography>Loading...</Typography>
       ) : (
