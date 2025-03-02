@@ -114,3 +114,83 @@ export const getCurrentUser = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+// @desc    Handle Google OAuth token
+// @route   POST /api/auth/google/token
+// @access  Public
+export const handleGoogleToken = async (req, res) => {
+  const { accessToken } = req.body;
+
+  if (!accessToken) {
+    return res.status(400).json({ error: "Access token is required" });
+  }
+
+  try {
+    // Set up Google OAuth client
+    const oauth2Client = createOAuth2Client();
+
+    // Set credentials with the provided access token
+    oauth2Client.setCredentials({ access_token: accessToken });
+
+    // Get user info from Google
+    const oauth2 = google.oauth2({
+      auth: oauth2Client,
+      version: "v2",
+    });
+
+    const userInfo = await oauth2.userinfo.get();
+
+    // Calculate token expiry (typically 1 hour for Google tokens)
+    const expiryDate = new Date();
+    expiryDate.setSeconds(expiryDate.getSeconds() + 3600); // 1 hour
+
+    // Find or create user
+    let user = await User.findOne({ googleId: userInfo.data.id });
+
+    if (user) {
+      // Update existing user
+      user.accessToken = accessToken;
+      user.tokenExpiry = expiryDate;
+      await user.save();
+    } else {
+      // Create new user
+      user = await User.create({
+        googleId: userInfo.data.id,
+        email: userInfo.data.email,
+        name: userInfo.data.name,
+        profileImage: userInfo.data.picture,
+        accessToken: accessToken,
+        refreshToken: "", // Note: Implicit flow doesn't provide refresh tokens
+        tokenExpiry: expiryDate,
+      });
+    }
+
+    // Create JWT
+    const payload = {
+      user: {
+        id: user.id,
+      },
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" },
+      (err, token) => {
+        if (err) throw err;
+        res.json({
+          token,
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            picture: user.profileImage,
+          },
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Auth error:", error);
+    res.status(500).json({ error: "Authentication failed" });
+  }
+};

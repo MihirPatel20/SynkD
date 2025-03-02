@@ -61,9 +61,11 @@ export const clearCache = (keyPattern) => {
     const matchingKeys = cacheService.getKeysByPattern(keyPattern);
     for (const key of matchingKeys) {
       cacheService.delete(key);
+      console.log(`Cache entry deleted for key: ${key}`);
     }
   } else {
     // Clear all cache
     cacheService.clear();
+    console.log("Cache cleared");
   }
 };

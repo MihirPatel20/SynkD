@@ -43,6 +43,11 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  const login = useCallback((token) => {
+    localStorage.setItem("access_token", token);
+    setIsAuthenticated(true);
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
@@ -51,24 +56,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   }, []);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        isLoading,
         user,
-        setIsAuthenticated: (value) => {
-          if (value !== isAuthenticated) {
-            setIsAuthenticated(value);
-          }
-        },
+        setIsAuthenticated,
         setUser: (userData) => {
           setUser(userData);
           localStorage.setItem("user", JSON.stringify(userData));
         },
+        login,
         logout,
       }}
     >

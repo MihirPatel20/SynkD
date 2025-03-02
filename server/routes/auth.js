@@ -1,8 +1,10 @@
+// server/routes/auth.js
 import express from "express";
 import {
   getGoogleAuthURL,
   handleGoogleCallback,
   getCurrentUser,
+  handleGoogleToken,
 } from "../controllers/authController.js";
 import auth from "../middleware/auth.js";
 
@@ -17,6 +19,11 @@ router.get("/google", getGoogleAuthURL);
 // @desc    Handle Google OAuth callback
 // @access  Public
 router.post("/google/callback", handleGoogleCallback);
+
+// @route   POST /api/auth/google/token
+// @desc    Authenticate with Google access token
+// @access  Public
+router.post("/google/token", handleGoogleToken);
 
 // @route   GET /api/auth/me
 // @desc    Get current user

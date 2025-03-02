@@ -1,3 +1,4 @@
+// server/models/User.js
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema({
@@ -24,7 +25,8 @@ const UserSchema = new mongoose.Schema({
   },
   refreshToken: {
     type: String,
-    required: true,
+    // Make it optional since implicit flow doesn't provide refresh tokens
+    required: false,
   },
   tokenExpiry: {
     type: Date,

@@ -1,3 +1,4 @@
+// src/components/auth/GoogleSignInButton.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, CircularProgress } from "@mui/material";
@@ -6,8 +7,7 @@ import GoogleIcon from "@mui/icons-material/Google";
 
 import { useAuth } from "../../context/AuthContext";
 import { useSnackbar } from "../../context/SnackbarContext";
-import sessionManager from "../../services/auth/sessionManager";
-import { fetchUserProfile } from "../../services/api/googleApi";
+import { authAPI } from "../../services/api/api";
 
 const GoogleSignInButton = ({
   buttonText = "Sign in with Google",
@@ -16,36 +16,31 @@ const GoogleSignInButton = ({
   onLoginFailure,
 }) => {
   const navigate = useNavigate();
-  const { setUser, setIsAuthenticated } = useAuth();
+  const { setUser, login } = useAuth();
   const { showSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
 
-  const login = useGoogleLogin({
+  const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
         setLoading(true);
-        console.log("Login successful", tokenResponse);
 
-        // Store tokens securely
-        localStorage.setItem("access_token", tokenResponse.access_token);
+        // Send the access token to your server
+        const response = await authAPI.googleLogin(tokenResponse.access_token);
 
-        // Fetch user profile information
-        const userData = await fetchUserProfile(tokenResponse.access_token);
-        setUser(userData);
+        // Store the JWT token from your server
+        localStorage.setItem("access_token", response.data.token);
 
-        // Initialize session
-        sessionManager.initialize();
-        sessionManager.logActivity("User logged in with Google");
-
-        // Update authentication state
-        setIsAuthenticated(true);
+        // Update auth context
+        login(response.data.token);
+        setUser(response.data.user);
 
         // Call optional callback if provided
         if (onLoginSuccess) {
-          onLoginSuccess(tokenResponse);
+          onLoginSuccess(response.data);
         }
 
-        // Show success message using global snackbar
+        // Show success message
         showSnackbar("Successfully signed in with Google!", "success");
 
         // Redirect after a short delay
@@ -87,7 +82,7 @@ const GoogleSignInButton = ({
           <GoogleIcon />
         )
       }
-      onClick={() => login()}
+      onClick={() => googleLogin()}
       disabled={loading}
       sx={{
         py: 1.5,
