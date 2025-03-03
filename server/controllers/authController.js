@@ -19,7 +19,6 @@ export const handleGoogleCallback = async (req, res) => {
 
   try {
     const { tokens } = await client.getToken(code);
-    console.log("Tokens:", tokens); // Log tokens for debugging
 
     const ticket = await client.verifyIdToken({
       idToken: tokens.id_token,
@@ -34,7 +33,6 @@ export const handleGoogleCallback = async (req, res) => {
       // Set a default expiry (e.g., 1 hour from now)
       expiryDate = new Date(Date.now() + 3600000);
     }
-    console.log("Calculated expiry date:", expiryDate); // Log expiry date for debugging
 
     let user = await User.findOne({ googleId: payload.sub });
 
@@ -57,8 +55,6 @@ export const handleGoogleCallback = async (req, res) => {
     }
 
     await user.save();
-
-    console.log("User:", user); // Log user for debugging
 
     const sessionToken = jwt.sign({ user: user }, process.env.JWT_SECRET, {
       expiresIn: "7d",

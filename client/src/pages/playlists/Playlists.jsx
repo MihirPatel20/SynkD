@@ -16,9 +16,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import { getUserPlaylists } from "../../api";
 import PlaylistCard from "./PlaylistCard";
 import { useSnackbar } from "../../context/SnackbarContext";
+import { useNavigate } from "react-router-dom";
 
 const Playlists = () => {
   const { showSnackbar } = useSnackbar();
+  const navigate = useNavigate();
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("recent");
@@ -27,11 +29,16 @@ const Playlists = () => {
   useEffect(() => {
     const fetchPlaylists = async () => {
       try {
-        const response = await getUserPlaylists(accessToken);
+        const response = await getUserPlaylists();
         setPlaylists(response.playlists);
       } catch (error) {
         console.error("Error fetching playlists:", error);
-        showSnackbar("Failed to load playlists", "error");
+        if (error.response && error.response.status === 401) {
+          showSnackbar("Please login again", "error");
+          navigate("/login"); // Redirect to login page if unauthorized
+        } else {
+          showSnackbar("Failed to load playlists", "error");
+        }
       } finally {
         setLoading(false);
       }
@@ -56,7 +63,6 @@ const Playlists = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3, mb: 2 }}>
-
       <Typography variant="h4" component="h1" gutterBottom>
         Your Playlists
       </Typography>
@@ -76,7 +82,7 @@ const Playlists = () => {
           }}
           sx={{ flex: 1 }}
         />
-        
+
         <FormControl variant="outlined" sx={{ ml: 2, minWidth: 120 }}>
           <InputLabel id="sort-select-label">Sort by</InputLabel>
           <Select
