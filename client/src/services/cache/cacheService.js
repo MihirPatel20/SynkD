@@ -11,7 +11,7 @@ class CacheService {
       hits: 0,
       misses: 0,
       sets: 0,
-      deletes: 0
+      deletes: 0,
     };
     this._loadCacheFromStorage();
   }
@@ -103,13 +103,13 @@ class CacheService {
   getKeysByPattern(pattern) {
     const regex = new RegExp(pattern);
     const matchingKeys = [];
-    
+
     for (const key of this.cache.keys()) {
       if (regex.test(key)) {
         matchingKeys.push(key);
       }
     }
-    
+
     return matchingKeys;
   }
 

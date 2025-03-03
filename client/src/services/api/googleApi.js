@@ -23,11 +23,11 @@ const getTokens = async (code) => {
         grant_type: "authorization_code",
       }),
     });
-    
+
     if (!response.ok) {
       throw new Error("Failed to get tokens");
     }
-    
+
     return response.json();
   } catch (error) {
     return handleApiError(error, "get tokens");
@@ -37,27 +37,24 @@ const getTokens = async (code) => {
 // Fetch user profile with caching
 const fetchUserProfile = async (accessToken) => {
   const cacheKey = `user_profile_${accessToken.substring(0, 10)}`;
-  
-  return fetchWithCache(
-    async () => {
-      const response = await fetch(
-        "https://www.googleapis.com/oauth2/v3/userinfo",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch user profile");
+
+  return fetchWithCache(async () => {
+    const response = await fetch(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       }
-      
-      return response.json();
-    },
-    cacheKey
-  ).catch(error => handleApiError(error, "fetch user profile"));
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user profile");
+    }
+
+    return response.json();
+  }, cacheKey).catch((error) => handleApiError(error, "fetch user profile"));
 };
 
 export { getTokens, fetchUserProfile };

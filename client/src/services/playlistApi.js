@@ -12,18 +12,12 @@ export const getPlaylistVideoDetails = async (
     console.log("Playlist details:", playlistDetails);
 
     // Extract video IDs from the playlist items
-    const videoIds = playlistDetails.items.map(
-      (item) => item.id
-    );
+    const videoIds = playlistDetails.items.map((item) => item.id);
 
     console.log("Video IDs:", videoIds);
 
     // Fetch analytics for all videos in the playlist
-    const videoAnalytics = await getVideoDetails(
-      videoIds,
-      startDate,
-      endDate
-    );
+    const videoAnalytics = await getVideoDetails(videoIds, startDate, endDate);
 
     // Map analytics data to each video in the playlist
     const itemsWithAnalytics = playlistDetails.items.map((item) => {

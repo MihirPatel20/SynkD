@@ -1,4 +1,3 @@
-
 // Session timeout in milliseconds (1 day)
 const SESSION_TIMEOUT = 60 * 60 * 1000 * 24;
 
@@ -21,7 +20,7 @@ class SessionManager {
   }
 
   setupActivityListeners() {
-    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+    ["mousedown", "keydown", "scroll", "touchstart"].forEach((event) => {
       window.addEventListener(event, () => {
         this.lastActivity = Date.now();
         this.resetSessionTimer();
@@ -31,13 +30,13 @@ class SessionManager {
 
   handleSessionTimeout = () => {
     // Clear session data
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('yt_tokens');
-    
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("yt_tokens");
+
     // Redirect to login
-    window.location.href = '/login';
-  }
+    window.location.href = "/login";
+  };
 
   logActivity(action) {
     console.log(`User activity: ${action} at ${new Date().toISOString()}`);

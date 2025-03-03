@@ -92,7 +92,7 @@ const PlaylistManager = () => {
       newSelected.add(playlistId);
     }
     setSelectedPlaylists(newSelected);
-    
+
     // If we have selections, enter selection mode
     if (newSelected.size > 0 && !selectionMode) {
       setSelectionMode(true);
@@ -179,8 +179,8 @@ const PlaylistManager = () => {
         <Grid container spacing={3}>
           {filteredPlaylists.map((playlist) => (
             <Grid item xs={12} sm={6} md={4} key={playlist.id}>
-              <PlaylistCard 
-                playlist={playlist} 
+              <PlaylistCard
+                playlist={playlist}
                 selectable={true}
                 selected={selectedPlaylists.has(playlist.id)}
                 onToggleSelect={() => handleToggleSelect(playlist.id)}
@@ -225,21 +225,21 @@ const PlaylistManager = () => {
             {selectedPlaylists.size} playlists selected
           </Typography>
           <ButtonGroup variant="contained" aria-label="playlist actions">
-            <Button 
+            <Button
               startIcon={<DeleteIcon />}
               onClick={handleDeleteSelected}
               color="error"
             >
               Delete
             </Button>
-            <Button 
+            <Button
               startIcon={<MergeIcon />}
               onClick={handleMergeSelected}
               color="primary"
             >
               Merge
             </Button>
-            <Button 
+            <Button
               startIcon={<ShareIcon />}
               onClick={handleShareSelected}
               color="secondary"

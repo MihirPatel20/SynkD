@@ -34,7 +34,7 @@ const Home = () => {
       } finally {
         setLoading(false);
       }
-    };  
+    };
 
     if (isAuthenticated) {
       fetchRecommendations();
