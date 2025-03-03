@@ -8,12 +8,12 @@ import Callback from "./pages/auth/Callback";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Home from "./pages/home/Home";
 import Playlists from "./pages/playlists/Playlists";
-import PlaylistDetail from "./pages/playlists/PlaylistDetail";
 import Profile from "./pages/profile/Profile";
 import Search from "./pages/search/Search";
 import Watch from "./pages/watch/Watch";
 import PlaylistManager from "./pages/playlists/PlaylistManager";
 import NotFound from "./components/common/NotFound";
+import PlaylistDetail from "./pages/PlaylistDetail";
 
 const AppRoutes = () => {
   return (

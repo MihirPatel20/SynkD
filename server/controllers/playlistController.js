@@ -61,12 +61,11 @@ export const getPlaylists = async (req, res) => {
 // @desc    Get playlist details with tracks
 // @route   GET /api/playlists/:id
 // @access  Private
-export const getPlaylistDetails = async (req, res) => {
+export const getPlaylistDetailsWithTracks = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     const playlistId = req.params.id;
 
-    // Set up YouTube API with user's access token
     const oauth2Client = new google.auth.OAuth2();
     oauth2Client.setCredentials({ access_token: user.accessToken });
 
@@ -74,6 +73,14 @@ export const getPlaylistDetails = async (req, res) => {
       version: "v3",
       auth: oauth2Client,
     });
+
+    // Get playlist details
+    const playlistResponse = await youtube.playlists.list({
+      part: "snippet,contentDetails",
+      id: playlistId,
+    });
+
+    const playlistDetails = playlistResponse.data.items[0];
 
     // Get playlist items
     let nextPageToken = null;
@@ -83,25 +90,38 @@ export const getPlaylistDetails = async (req, res) => {
       const response = await youtube.playlistItems.list({
         part: "snippet,contentDetails",
         playlistId: playlistId,
-        maxResults: 50,
+        maxResults: 10,
         pageToken: nextPageToken || undefined,
       });
 
       allItems = [...allItems, ...response.data.items];
       nextPageToken = response.data.nextPageToken;
-    } while (nextPageToken);
+    } while (false); // To get all items, change to: while (nextPageToken);
 
     // Format the response
-    const tracks = allItems.map((item) => ({
-      id: item.id,
-      videoId: item.contentDetails.videoId,
-      title: item.snippet.title,
-      thumbnail: item.snippet.thumbnails?.default?.url || "",
-      position: item.snippet.position,
-      channelTitle: item.snippet.channelTitle,
-    }));
+    const formattedResponse = {
+      playlistId: playlistDetails.id,
+      title: playlistDetails.snippet.title,
+      description: playlistDetails.snippet.description,
+      channelTitle: playlistDetails.snippet.channelTitle,
+      channelId: playlistDetails.snippet.channelId,
+      thumbnail: playlistDetails.snippet.thumbnails.high.url,
+      itemCount: playlistDetails.contentDetails.itemCount,
+      publishedAt: playlistDetails.snippet.publishedAt,
+      tracks: allItems.map((item) => ({
+        id: item.id,
+        title: item.snippet.title,
+        thumbnail: item.snippet.thumbnails.high.url,
+        position: item.snippet.position,
+        channelTitle: item.snippet.videoOwnerChannelTitle,
+        channelId: item.snippet.videoOwnerChannelId,
+        videoId: item.contentDetails.videoId,
+        videoPublishedAt: item.contentDetails.videoPublishedAt,
+        publishedAt: item.snippet.publishedAt,
+      })),
+    };
 
-    res.json(tracks);
+    res.json(formattedResponse);
   } catch (error) {
     console.error("Error fetching playlist details:", error);
     res.status(500).json({ error: "Failed to fetch playlist details" });
