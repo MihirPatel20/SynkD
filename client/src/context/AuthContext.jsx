@@ -18,16 +18,22 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("access_token");
+      const storedUser = localStorage.getItem("user");
 
       if (token) {
         setIsAuthenticated(true);
-        try {
-          const userData = await fetchUserProfile(token);
-          setUser(userData);
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          // Handle token expiration or other errors
-          logout();
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else {
+          try {
+            const userData = await fetchUserProfile(token);
+            setUser(userData);
+            localStorage.setItem("user", JSON.stringify(userData));
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+            // Handle token expiration or other errors
+            logout();
+          }
         }
       }
 
@@ -39,8 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("yt_tokens");
+    localStorage.removeItem("user");
     setIsAuthenticated(false);
     setUser(null);
   }, []);
@@ -59,7 +64,10 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(value);
           }
         },
-        setUser,
+        setUser: (userData) => {
+          setUser(userData);
+          localStorage.setItem("user", JSON.stringify(userData));
+        },
         logout,
       }}
     >

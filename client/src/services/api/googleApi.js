@@ -1,64 +1,60 @@
-import axios from "axios";
+// src/services/api/googleApi.js
 
-const BASE_URL = "https://www.googleapis.com/youtube/v3";
+import cacheService from "../cache/cacheService";
+import { fetchWithCache, handleApiError } from "../../utils/apiUtils";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
 const CLIENT_SECRET = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
-
-// Create a new axios instance for Google API
-const createGapiInstance = (accessToken = null) => {
-  const headers = accessToken
-    ? { Authorization: `Bearer ${accessToken}` }
-    : { "X-Goog-Api-Key": import.meta.env.VITE_YOUTUBE_API_KEY };
-
-  return axios.create({
-    baseURL: BASE_URL,
-    headers,
-  });
-};
-
-export default createGapiInstance;
+const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
 
 // Get tokens from authorization code
 const getTokens = async (code) => {
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      code,
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      redirect_uri: REDIRECT_URI,
-      grant_type: "authorization_code",
-    }),
-  });
+  try {
+    const response = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        redirect_uri: REDIRECT_URI,
+        grant_type: "authorization_code",
+      }),
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to get tokens");
+    if (!response.ok) {
+      throw new Error("Failed to get tokens");
+    }
+
+    return response.json();
+  } catch (error) {
+    return handleApiError(error, "get tokens");
   }
-
-  return response.json();
 };
 
-// Fetch user profile
+// Fetch user profile with caching
 const fetchUserProfile = async (accessToken) => {
-  try {
-    // You can use your existing axios instance factory
-    const api = createGapiInstance(accessToken);
+  const cacheKey = `user_profile_${accessToken.substring(0, 10)}`;
 
-    // Make request to Google's userinfo endpoint
-    const response = await api.get(
-      "https://www.googleapis.com/oauth2/v3/userinfo"
+  return fetchWithCache(async () => {
+    const response = await fetch(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
     );
 
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching user profile:", error);
-    throw error;
-  }
+    if (!response.ok) {
+      throw new Error("Failed to fetch user profile");
+    }
+
+    return response.json();
+  }, cacheKey).catch((error) => handleApiError(error, "fetch user profile"));
 };
 
 export { getTokens, fetchUserProfile };

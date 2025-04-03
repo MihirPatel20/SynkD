@@ -23,6 +23,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton";
+import YouTubeSignInButton from "../../components/auth/YouTubeSignInButton";
 import sessionManager from "../../services/auth/sessionManager";
 
 const Login = () => {
@@ -344,6 +345,8 @@ const Login = () => {
               </Box>
 
               <GoogleSignInButton redirectPath="/home" />
+
+              <YouTubeSignInButton redirectPath="/home" />
 
               <Grid container justifyContent="center" sx={{ mt: 3 }}>
                 <Grid item>

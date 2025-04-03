@@ -7,7 +7,7 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { useAuth } from "../../context/AuthContext";
 import { useSnackbar } from "../../context/SnackbarContext";
 import sessionManager from "../../services/auth/sessionManager";
-import { fetchUserProfile } from "../../services/api/googleApi";
+import { googleLoginCallback } from "../../api";
 
 const GoogleSignInButton = ({
   buttonText = "Sign in with Google",
@@ -20,18 +20,28 @@ const GoogleSignInButton = ({
   const { showSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
 
+  const scopes = [
+    "https://www.googleapis.com/auth/youtube",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/youtube.readonly",
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/yt-analytics.readonly",
+    "https://www.googleapis.com/auth/yt-analytics-monetary.readonly",
+    // "https://www.googleapis.com/auth/youtubereporting",
+  ];
+
+  // Join the scopes with a space delimiter
+  const scopeString = scopes.join(" ");
+
   const login = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
+    onSuccess: async (codeResponse) => {
       try {
         setLoading(true);
-        console.log("Login successful", tokenResponse);
 
-        // Store tokens securely
-        localStorage.setItem("access_token", tokenResponse.access_token);
-
-        // Fetch user profile information
-        const userData = await fetchUserProfile(tokenResponse.access_token);
-        setUser(userData);
+        // Use the new API function
+        const response = await googleLoginCallback(codeResponse.code);
+        console.log("Login successful:", response);
 
         // Initialize session
         sessionManager.initialize();
@@ -39,10 +49,11 @@ const GoogleSignInButton = ({
 
         // Update authentication state
         setIsAuthenticated(true);
+        setUser(response.user);
 
         // Call optional callback if provided
         if (onLoginSuccess) {
-          onLoginSuccess(tokenResponse);
+          onLoginSuccess(response);
         }
 
         // Show success message using global snackbar
@@ -71,9 +82,8 @@ const GoogleSignInButton = ({
         onLoginFailure(errorResponse);
       }
     },
-    scope:
-      "https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
-    flow: "implicit",
+    flow: "auth-code",
+    scope: scopeString,
   });
 
   return (

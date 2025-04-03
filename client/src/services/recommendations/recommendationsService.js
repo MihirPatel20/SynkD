@@ -1,99 +1,70 @@
+// src/services/recommendationsService.js
+
 import { processResponseData } from "../../utils/formatters";
-import createGapiInstance from "../api/googleApi";
+import createYTDataInstance from "../api/youtubeDataApi";
+import cacheService from "../cache/cacheService";
+import { fetchWithCache, handleApiError } from "../../utils/apiUtils";
+import axios from "axios";
 
-// Cache duration in milliseconds (5 minutes)
-const CACHE_DURATION = 5 * 60 * 1000;
-
-// Create a cache using closure instead of class property
-const cache = new Map();
-
-// Rate limit state
-let rateLimit = {
-  tokens: 100,
-  lastRefill: Date.now(),
-  refillRate: 100 / (60 * 1000), // 100 tokens per minute
-};
-
-// Helper functions
-const getCached = (key) => {
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.data;
+// Rate limit service
+class RateLimitService {
+  constructor(tokensPerMinute = 100) {
+    this.rateLimit = {
+      tokens: tokensPerMinute,
+      lastRefill: Date.now(),
+      refillRate: tokensPerMinute / (60 * 1000),
+    };
   }
-  return null;
-};
 
-const setCache = (key, data) => {
-  cache.set(key, {
-    data,
-    timestamp: Date.now(),
-  });
-};
+  checkRateLimit() {
+    const now = Date.now();
+    const timePassed = now - this.rateLimit.lastRefill;
+    const tokensToAdd = timePassed * this.rateLimit.refillRate;
 
-const checkRateLimit = () => {
-  const now = Date.now();
-  const timePassed = now - rateLimit.lastRefill;
-  const tokensToAdd = timePassed * rateLimit.refillRate;
+    this.rateLimit.tokens = Math.min(100, this.rateLimit.tokens + tokensToAdd);
+    this.rateLimit.lastRefill = now;
 
-  rateLimit.tokens = Math.min(100, rateLimit.tokens + tokensToAdd);
-  rateLimit.lastRefill = now;
+    if (this.rateLimit.tokens < 1) return false;
 
-  if (rateLimit.tokens < 1) return false;
+    this.rateLimit.tokens -= 1;
+    return true;
+  }
 
-  rateLimit.tokens -= 1;
-  return true;
-};
+  async waitForRateLimit() {
+    while (!this.checkRateLimit()) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    return true;
+  }
+}
 
-export const getHomeRecommendations = async () => {
+const rateLimitService = new RateLimitService();
+
+export const getHomeRecommendations = async (signal = null) => {
   const cacheKey = "home_recommendations";
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
 
-  if (!checkRateLimit()) {
-    throw new Error("Rate limit exceeded. Please try again later.");
-  }
+  return fetchWithCache(
+    async () => {
+      await rateLimitService.waitForRateLimit();
 
-  try {
-    const accessToken = localStorage.getItem("access_token");
-    const api = createGapiInstance(accessToken);
+      const accessToken = localStorage.getItem("access_token");
+      const api = createYTDataInstance(accessToken);
+      const popularResponse = await api.get("/videos", {
+        params: {
+          part: "snippet,statistics",
+          chart: "mostPopular",
+          videoCategoryId: "10",
+          maxResults: 5,
+        },
+        signal,
+      });
 
-    const [activitiesResponse, popularResponse, subscriptionsResponse] =
-      await Promise.all([
-        api.get("/activities", {
-          params: {
-            part: "snippet,contentDetails",
-            mine: true,
-            maxResults: 25,
-          },
-        }),
-        api.get("/videos", {
-          params: {
-            part: "snippet,statistics",
-            chart: "mostPopular",
-            videoCategoryId: "10",
-            maxResults: 25,
-          },
-        }),
-        api.get("/subscriptions", {
-          params: {
-            part: "snippet",
-            mine: true,
-            maxResults: 25,
-          },
-        }),
-      ]);
-
-    const recommendations = processResponseData(
-      [...activitiesResponse.data.items, ...popularResponse.data.items],
-      subscriptionsResponse.data.items
-    );
-
-    setCache(cacheKey, recommendations);
-    return recommendations;
-  } catch (error) {
-    console.error("Error fetching recommendations:", error);
-    throw new Error("Failed to fetch recommendations");
-  }
+      return processResponseData(popularResponse.data.items, []);
+    },
+    cacheKey,
+    {},
+    signal
+  ).catch((error) => handleApiError(error, "fetch recommendations"));
 };
 
 export default {

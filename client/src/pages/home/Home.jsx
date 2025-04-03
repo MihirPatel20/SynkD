@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Container, Typography, Box, CircularProgress } from "@mui/material";
 
 import VideoGrid from "../../components/video/VideoGrid";
-import recommendationsService from "../../services/recommendations/recommendationsService";
 import sessionManager from "../../services/auth/sessionManager";
 import { useAuth } from "../../context/AuthContext";
+import { getHomeRecommendations } from "../../services/recommendations/recommendationsService";
 
 const Home = () => {
   const [videos, setVideos] = useState([]);
@@ -17,25 +17,29 @@ const Home = () => {
     sessionManager.initialize();
     sessionManager.logActivity("Accessed homepage");
 
-    const loadRecommendations = async () => {
+    // Create a new AbortController for this request
+    const controller = new AbortController();
+
+    const fetchRecommendations = async () => {
       try {
         setLoading(true);
-        const recommendations =
-          await recommendationsService.getHomeRecommendations();
-        setVideos(recommendations);
+        const data = await getHomeRecommendations(controller.signal);
+        setVideos(data);
         setError(null);
-      } catch (error) {
-        console.error("Error loading recommendations:", error);
-        setError("Failed to load recommendations. Please try again later.");
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setError("Failed to load recommendations");
+          console.error(err);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     if (isAuthenticated) {
-      loadRecommendations();
+      fetchRecommendations();
       // Refresh recommendations every 5 minutes
-      const refreshInterval = setInterval(loadRecommendations, 5 * 60 * 1000);
+      const refreshInterval = setInterval(fetchRecommendations, 5 * 60 * 1000);
       return () => clearInterval(refreshInterval);
     } else {
       // Load non-personalized recommendations for non-authenticated users
@@ -45,6 +49,11 @@ const Home = () => {
         .catch((err) => setError("Failed to load popular videos"))
         .finally(() => setLoading(false));
     }
+
+    // Cleanup function to abort the request when component unmounts
+    return () => {
+      controller.abort();
+    };
   }, [isAuthenticated]);
 
   if (loading) {

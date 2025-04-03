@@ -1,0 +1,33 @@
+{
+  "name": "yt-music-playlist-manager-server",
+  "version": "1.0.0",
+  "description": "Backend for YouTube Music Playlist Manager",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon -r dotenv/config server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "youtube",
+    "music",
+    "playlist",
+    "api"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "child_process": "^1.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.21.2",
+    "google-auth-library": "^9.15.1",
+    "googleapis": "^120.0.0",
+    "jsonwebtoken": "^9.0.1",
+    "mongoose": "^7.4.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

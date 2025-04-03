@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -11,7 +11,8 @@ import {
   MenuItem,
   Chip,
   CardActionArea,
-} from '@mui/material';
+  Checkbox,
+} from "@mui/material";
 import {
   MoreVert as MoreVertIcon,
   MusicNote as MusicNoteIcon,
@@ -19,13 +20,31 @@ import {
   Share as ShareIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-} from '@mui/icons-material';
-import { formatDistanceToNow } from 'date-fns';
+  Headphones as HeadphonesIcon,
+} from "@mui/icons-material";
+import { formatDistanceToNow } from "date-fns";
+import { getPlaylistHistory } from "../../services/analytics/listeningHistoryDB";
 
-const PlaylistCard = ({ playlist }) => {
+const PlaylistCard = ({
+  playlist,
+  selectable = false,
+  selected = false,
+  onToggleSelect = () => {},
+}) => {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [playCount, setPlayCount] = useState(0);
   const open = Boolean(anchorEl);
+
+  useEffect(() => {
+    const fetchPlayCount = async () => {
+      if (playlist && playlist.youtubePlaylistId) {
+        const history = await getPlaylistHistory(playlist.youtubePlaylistId);
+        setPlayCount(history.length);
+      }
+    };
+    fetchPlayCount();
+  }, [playlist]);
 
   const handleClick = (event) => {
     event.stopPropagation();
@@ -37,139 +56,122 @@ const PlaylistCard = ({ playlist }) => {
   };
 
   const handleAction = (action) => (event) => {
+    console.log(`${action} playlist:`, playlist.youtubePlaylistId);
     event.stopPropagation();
     handleClose();
-    // Implement actions
-    console.log(`${action} playlist:`, playlist.id);
   };
 
-  const handlePlaylistClick = () => {
-    navigate(`/playlist/${playlist.id}`);
+  const handleCardClick = () => {
+    navigate(`/playlist/${playlist.youtubePlaylistId}`);
   };
 
   return (
-    <Card 
-      sx={{ 
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: 4,
+    <Card
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        position: "relative",
+        bgcolor: "background.paper",
+        transition: "transform 0.3s ease-in-out",
+        "&:hover": {
+          transform: "translateY(-5px)",
+          cursor: "pointer",
+          boxShadow: 6,
         },
       }}
+      onClick={handleCardClick}
     >
-      <CardActionArea onClick={handlePlaylistClick}>
-        <Box sx={{ position: 'relative' }}>
-          <CardMedia
-            component="img"
-            height="160"
-            image={playlist.snippet.thumbnails?.high?.url || 'https://via.placeholder.com/320x160?text=No+Thumbnail'}
-            alt={playlist.snippet.title}
-          />
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              bgcolor: 'rgba(0, 0, 0, 0.6)',
-              color: 'white',
-              p: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <Typography variant="caption">
-              {playlist.contentDetails?.itemCount || 0} items
-            </Typography>
-            <Chip
-              icon={<MusicNoteIcon sx={{ color: 'inherit' }} />}
-              label="Music"
-              size="small"
-              sx={{
-                bgcolor: 'rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                '& .MuiChip-icon': {
-                  color: 'white',
-                },
-              }}
-            />
-          </Box>
-        </Box>
-      </CardActionArea>
+      {selectable && (
+        <Checkbox
+          checked={selected}
+          sx={{ position: "absolute", top: 8, left: 8, zIndex: 1 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect();
+          }}
+        />
+      )}
+      <CardMedia
+        component="img"
+        sx={{ height: 140, objectFit: "cover" }}
+        image={
+          playlist.thumbnail ||
+          "https://via.placeholder.com/320x180?text=No+Thumbnail"
+        }
+        alt={playlist.title}
+      />
 
-      <CardContent sx={{ flexGrow: 1, position: 'relative' }}>
-        <Typography variant="h6" noWrap>
-          {playlist.snippet.title}
+      <CardContent>
+        <Typography variant="h6" component="div" noWrap>
+          {playlist.title}
         </Typography>
-        
-        <Typography 
-          variant="body2" 
+
+        <Box sx={{ display: "flex", justifyContent: "space-between", my: 1 }}>
+          <Chip
+            icon={<MusicNoteIcon />}
+            label={`${playlist.itemCount || 0} items`}
+            size="small"
+          />
+          <Chip
+            icon={<HeadphonesIcon />}
+            label={`${playCount} plays`}
+            size="small"
+            sx={{ ml: 1 }}
+          />
+        </Box>
+        <Typography
+          variant="body2"
           color="text.secondary"
-          sx={{
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            mb: 1,
+          noWrap
+          sx={{ mt: 1 }}
+        >
+          {playlist.description || "No description"}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+          Created{" "}
+          {formatDistanceToNow(new Date(playlist.createdAt), {
+            addSuffix: true,
+          })}
+        </Typography>
+      </CardContent>
+
+      <Box
+        sx={{ display: "flex", justifyContent: "space-between", p: 1, pt: 0 }}
+      >
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            // Implement play functionality
+          }}
+          sx={{ mr: 1 }}
+        >
+          <PlayArrowIcon />
+        </IconButton>
+        <IconButton
+          onClick={(e) => {
+            handleClick(e);
+            e.stopPropagation();
           }}
         >
-          {playlist.snippet.description || 'No description'}
-        </Typography>
+          <MoreVertIcon />
+        </IconButton>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="caption" color="text.secondary">
-            Created {formatDistanceToNow(new Date(playlist.snippet.publishedAt), { addSuffix: true })}
-          </Typography>
-          
-          <Box>
-            <IconButton 
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Implement play functionality
-              }}
-              sx={{ mr: 1 }}
-            >
-              <PlayArrowIcon />
-            </IconButton>
-            
-            <IconButton
-              size="small"
-              onClick={handleClick}
-              aria-controls={open ? 'playlist-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={open ? 'true' : undefined}
-            >
-              <MoreVertIcon />
-            </IconButton>
-          </Box>
-        </Box>
-
-        <Menu
-          id="playlist-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <MenuItem onClick={handleAction('share')}>
+        <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+          <MenuItem onClick={handleAction("share")}>
             <ShareIcon fontSize="small" sx={{ mr: 1 }} />
             Share
           </MenuItem>
-          <MenuItem onClick={handleAction('edit')}>
+          <MenuItem onClick={handleAction("edit")}>
             <EditIcon fontSize="small" sx={{ mr: 1 }} />
             Edit
           </MenuItem>
-          <MenuItem onClick={handleAction('delete')} sx={{ color: 'error.main' }}>
+          <MenuItem onClick={handleAction("delete")}>
             <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
             Delete
           </MenuItem>
         </Menu>
-      </CardContent>
+      </Box>
     </Card>
   );
 };
