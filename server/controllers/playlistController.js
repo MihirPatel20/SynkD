@@ -151,3 +151,107 @@ export const createNewPlaylist = async (req, res) => {
     }
   }
 };
+
+// @desc    Create shuffled playlist with unplayed songs first
+// @route   POST /api/playlists/shuffle
+// @access  Private
+export const createShufflePlaylist = async (req, res) => {
+  try {
+    const {
+      playlistId,
+      limit = 1000,
+      title,
+      description = "",
+      privacy_status = "PRIVATE",
+    } = req.body;
+
+
+    console.log("Request body:", req.body);
+
+    if (!playlistId) {
+      return res.status(400).json({ error: "playlistId is required" });
+    }
+
+    // Validate privacy_status
+    const validPrivacyStatuses = ["PUBLIC", "PRIVATE", "UNLISTED"];
+    if (!validPrivacyStatuses.includes(privacy_status)) {
+      return res.status(400).json({ error: "Invalid privacy status" });
+    }
+
+    // 1. Fetch playlist tracks
+    const playlistRes = await executeYTMusicFunction(req, res, "get_playlist", [
+      playlistId,
+      limit,
+    ]);
+
+    console.log("Playlist result:", playlistRes);
+    if (!playlistRes?.success) {
+      return res
+        .status(500)
+        .json({ error: playlistRes.error || "Failed to fetch playlist" });
+    }
+
+    const playlistTracks = playlistRes.data?.tracks || [];
+
+    // 2. Fetch user history
+    const historyRes = await executeYTMusicFunction(req, res, "get_history");
+    if (!historyRes?.success) {
+      return res
+        .status(500)
+        .json({ error: historyRes.error || "Failed to fetch history" });
+    }
+
+    const historyVideoIds = new Set(
+      (historyRes.data || []).map((track) => track.videoId).filter(Boolean)
+    );
+
+    // 3. Shuffle logic
+    const unplayed = playlistTracks.filter(
+      (track) => !historyVideoIds.has(track.videoId)
+    );
+    const played = playlistTracks.filter((track) =>
+      historyVideoIds.has(track.videoId)
+    );
+
+    const _shuffle = (arr) => arr.sort(() => Math.random() - 0.5); // Quick shuffle
+    const shuffledVideoIds = [..._shuffle(unplayed), ...played]
+      .map((track) => track.videoId)
+      .filter(Boolean);
+
+    // 4. Create the new shuffled playlist
+    const createPlaylistResult = await executeYTMusicFunction(
+      req,
+      res,
+      "create_playlist",
+      [
+        title || `${playlistRes.data.title} - Shuffled`,
+        description || "Shuffled with unplayed first",
+        privacy_status,
+        shuffledVideoIds,
+      ]
+    );
+
+    console.log("Create playlist result:", createPlaylistResult);
+
+    if (!createPlaylistResult?.success) {
+      return res.status(500).json({
+        error:
+          createPlaylistResult.error || "Failed to create shuffled playlist",
+      });
+    }
+
+    res.status(201).json({
+      message: "Shuffled playlist created successfully",
+      playlistId: createPlaylistResult.data,
+      totalTracks: shuffledVideoIds.length,
+    });
+  } catch (error) {
+    console.error("Error in createShufflePlaylist controller:", error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "Unexpected error while creating shuffled playlist",
+        details: error.message,
+      });
+    }
+  }
+};

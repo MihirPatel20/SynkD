@@ -3,6 +3,7 @@ import {
   getPlaylists,
   getPlaylistDetailsWithTracks,
   createNewPlaylist,
+  createShufflePlaylist,
 } from "../controllers/playlistController.js";
 import auth from "../middleware/auth.js";
 
@@ -22,5 +23,10 @@ router.get("/:id", auth, getPlaylistDetailsWithTracks);
 // @desc    Create a new playlist
 // @access  Private
 router.post("/", auth, createNewPlaylist);
+
+// @route   POST /api/playlists/:id
+// @desc    Create a new playlist
+// @access  Private
+router.post("/shuffle", auth, createShufflePlaylist);
 
 export default router;

@@ -67,6 +67,23 @@ const endpoints = {
       method: "POST",
       path: "/playlists",
       description: "Create a new playlist",
+      body: JSON.stringify({
+        title: "Test 2",
+        description: "A playlist created via API",
+        privacy_status: "PRIVATE",
+        videoIds: ["hHZqggIcTDU", "NWCG3MUDc0A", "D8X6XhKtUL0", "hUtBXoUzgaM"],
+      }),
+    },
+    {
+      method: "POST",
+      path: "/playlists/shuffle",
+      description: "Create a new playlist with shuffled tracks",
+      body: JSON.stringify({
+        title: "Shuffled Playlist",
+        description: "A playlist created via API",
+        privacy_status: "PRIVATE",
+        playlistId: "PL2Wu6wXw0ACgVb0vI1eogO8N40zvJeTCK",
+      }),
     },
   ],
   library: [
@@ -135,9 +152,10 @@ const TestPage = () => {
     }
   };
 
-  const handleEndpointClick = (path, method) => {
+  const handleEndpointClick = (path, method, body) => {
     setEndpoint(path);
     setMethod(method);
+    setBody(body);
     setShowEndpoints(false);
   };
 
@@ -294,7 +312,9 @@ const TestPage = () => {
                 <ListItem
                   key={index}
                   button
-                  onClick={() => handleEndpointClick(ep.path, ep.method)}
+                  onClick={() =>
+                    handleEndpointClick(ep.path, ep.method, ep.body)
+                  }
                   sx={{ cursor: "pointer" }}
                 >
                   <ListItemText

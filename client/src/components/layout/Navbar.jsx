@@ -31,6 +31,14 @@ const Navbar = () => {
 
         <Button
           component={RouterLink}
+          to="/test"
+          color="inherit"
+          sx={{ textTransform: "none" }}
+        >
+          API console
+        </Button>
+        <Button
+          component={RouterLink}
           to="/library"
           color="inherit"
           sx={{ textTransform: "none" }}
