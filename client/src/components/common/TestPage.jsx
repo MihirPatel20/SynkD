@@ -39,23 +39,6 @@ const endpoints = {
     },
     { method: "GET", path: "/auth/me", description: "Get current user" },
   ],
-  reports: [
-    {
-      method: "GET",
-      path: "reports/playlist/PL2Wu6wXw0ACgVb0vI1eogO8N40zvJeTCK",
-      description: "Get user's YouTube Playlist Reports",
-    },
-    {
-      method: "GET",
-      path: "reports/status/fca7e0db-96da-4207-b925-cb236470cdd7",
-      description: "Get report job status",
-    },
-    {
-      method: "GET",
-      path: "reports/download/fca7e0db-96da-4207-b925-cb236470cdd7/:reportId",
-      description: "Download report",
-    },
-  ],
   playlists: [
     { method: "GET", path: "/playlists", description: "Get playlists" },
     {
@@ -86,28 +69,38 @@ const endpoints = {
       }),
     },
   ],
-  library: [
+  music: [
     {
       method: "GET",
-      path: "/library",
+      path: "/music/home",
+      description: "Get home feed music videos",
+    },
+    {
+      method: "GET",
+      path: "/music/library",
       description: "Get user's YouTube library",
     },
-  ],
-  history: [
     {
       method: "GET",
-      path: "/history",
+      path: "/music/history",
       description: "Get user's play history",
     },
+  ],
+  reports: [
     {
-      method: "POST",
-      path: "/history/sync",
-      description: "Sync play history from YouTube Music",
+      method: "GET",
+      path: "reports/playlist/PL2Wu6wXw0ACgVb0vI1eogO8N40zvJeTCK",
+      description: "Get user's YouTube Playlist Reports",
     },
     {
-      method: "PUT",
-      path: "/history/:videoId",
-      description: "Update play count for a song",
+      method: "GET",
+      path: "reports/status/fca7e0db-96da-4207-b925-cb236470cdd7",
+      description: "Get report job status",
+    },
+    {
+      method: "GET",
+      path: "reports/download/fca7e0db-96da-4207-b925-cb236470cdd7/:reportId",
+      description: "Download report",
     },
   ],
 };

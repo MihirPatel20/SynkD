@@ -4,9 +4,8 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import errorHandler from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.js";
+import musicRoutes from "./routes/music.js";
 import playlistRoutes from "./routes/playlists.js";
-import historyRoutes from "./routes/history.js";
-import libraryRoutes from "./routes/library.js";
 import reportsRoutes from "./routes/reports.js";
 
 // Load environment variables
@@ -29,9 +28,8 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/music", musicRoutes);
 app.use("/api/playlists", playlistRoutes);
-app.use("/api/history", historyRoutes);
-app.use("/api/library", libraryRoutes);
 app.use("/api/reports", reportsRoutes);
 
 // Error handler middleware

@@ -5,6 +5,7 @@ import VideoGrid from "../../components/video/VideoGrid";
 import sessionManager from "../../services/auth/sessionManager";
 import { useAuth } from "../../context/AuthContext";
 import { getHomeRecommendations } from "../../services/recommendations/recommendationsService";
+import { getHomeFeedVideos } from "../../api/historyApi";
 
 const Home = () => {
   const [videos, setVideos] = useState([]);
@@ -13,48 +14,20 @@ const Home = () => {
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    // Initialize session management
-    sessionManager.initialize();
-    sessionManager.logActivity("Accessed homepage");
-
-    // Create a new AbortController for this request
-    const controller = new AbortController();
-
-    const fetchRecommendations = async () => {
+    const fetchPlaylists = async () => {
       try {
         setLoading(true);
-        const data = await getHomeRecommendations(controller.signal);
-        setVideos(data);
-        setError(null);
-      } catch (err) {
-        if (err.name !== "AbortError") {
-          setError("Failed to load recommendations");
-          console.error(err);
-        }
+        const response = await getHomeFeedVideos();
+        console.log("Home feed response:", response);
+        setVideos(response.videos);
+      } catch (error) {
+        console.error("Error fetching playlists:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    if (isAuthenticated) {
-      fetchRecommendations();
-      // Refresh recommendations every 5 minutes
-      const refreshInterval = setInterval(fetchRecommendations, 5 * 60 * 1000);
-      return () => clearInterval(refreshInterval);
-    } else {
-      // Load non-personalized recommendations for non-authenticated users
-      recommendationsService
-        .getPopularMusicVideos()
-        .then(setVideos)
-        .catch((err) => setError("Failed to load popular videos"))
-        .finally(() => setLoading(false));
-    }
-
-    // Cleanup function to abort the request when component unmounts
-    return () => {
-      controller.abort();
-    };
-  }, [isAuthenticated]);
+    fetchPlaylists();
+  }, []);
 
   if (loading) {
     return (
