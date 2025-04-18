@@ -1,5 +1,7 @@
 // controllers/playlistController.js
 
+import { google } from "googleapis";
+import User from "../models/User.js";
 import { executeYTMusicFunction } from "../utils/pythonExecutor.js";
 
 // @desc    Get user's YouTube playlists

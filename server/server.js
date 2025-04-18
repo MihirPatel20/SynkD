@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import errorHandler from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.js";
+import youtubeRoutes from "./routes/youtube.js";
 import musicRoutes from "./routes/music.js";
 import playlistRoutes from "./routes/playlists.js";
 import reportsRoutes from "./routes/reports.js";
@@ -31,6 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/music", musicRoutes);
 app.use("/api/playlists", playlistRoutes);
 app.use("/api/reports", reportsRoutes);
+app.use("/api/youtube", youtubeRoutes);
 
 // Error handler middleware
 app.use(errorHandler);

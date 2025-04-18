@@ -57,6 +57,7 @@ const endpoints = {
         videoIds: ["hHZqggIcTDU", "NWCG3MUDc0A", "D8X6XhKtUL0", "hUtBXoUzgaM"],
       }),
     },
+
     {
       method: "POST",
       path: "/playlists/shuffle",
@@ -66,6 +67,14 @@ const endpoints = {
         description: "A playlist created via API",
         privacy_status: "PRIVATE",
         playlistId: "PL2Wu6wXw0ACh4FGBbMTWOBK9Nt5VAArk3",
+      }),
+    },
+    {
+      method: "PATCH",
+      path: "youtube/playlist/shuffle",
+      description: "Reorder playlist tracks with random shuffling",
+      body: JSON.stringify({
+        playlistId: "PL2Wu6wXw0ACg3GZc3haOTrWSZ3HpGEJyT",
       }),
     },
   ],
@@ -126,6 +135,9 @@ const TestPage = () => {
           break;
         case "POST":
           response = await api.post(endpoint, body);
+          break;
+        case "PATCH":
+          response = await api.patch(endpoint, JSON.parse(body));
           break;
         case "PUT":
           response = await api.put(endpoint, JSON.parse(body));
@@ -193,6 +205,7 @@ const TestPage = () => {
               >
                 <MenuItem value="GET">GET</MenuItem>
                 <MenuItem value="POST">POST</MenuItem>
+                <MenuItem value="PATCH">PATCH</MenuItem>
                 <MenuItem value="PUT">PUT</MenuItem>
                 <MenuItem value="DELETE">DELETE</MenuItem>
               </Select>
@@ -229,7 +242,7 @@ const TestPage = () => {
               {loading ? "Testing..." : "Test API"}
             </Button>
           </Grid>
-          {(method === "POST" || method === "PUT") && (
+          {(method === "POST" || method === "PUT" || method === "PATCH") && (
             <Grid item xs={12}>
               <TextField
                 label="Request Body (JSON)"
