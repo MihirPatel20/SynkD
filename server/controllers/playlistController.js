@@ -152,7 +152,7 @@ export const createNewPlaylist = async (req, res) => {
   }
 };
 
-// @desc    Create shuffled playlist with unplayed songs first
+// @desc    Create shuffled playlist with advanced options
 // @route   POST /api/playlists/shuffle
 // @access  Private
 export const createShufflePlaylist = async (req, res) => {
@@ -163,8 +163,11 @@ export const createShufflePlaylist = async (req, res) => {
       title,
       description = "",
       privacy_status = "PRIVATE",
+      prioritizeUnplayed = true,
+      skipRecentlyPlayedSongs,
+      pushRecentlyPlayedToEnd = false,
+      excludedVideoIds = [],
     } = req.body;
-
 
     console.log("Request body:", req.body);
 
@@ -172,7 +175,6 @@ export const createShufflePlaylist = async (req, res) => {
       return res.status(400).json({ error: "playlistId is required" });
     }
 
-    // Validate privacy_status
     const validPrivacyStatuses = ["PUBLIC", "PRIVATE", "UNLISTED"];
     if (!validPrivacyStatuses.includes(privacy_status)) {
       return res.status(400).json({ error: "Invalid privacy status" });
@@ -184,7 +186,6 @@ export const createShufflePlaylist = async (req, res) => {
       limit,
     ]);
 
-    console.log("Playlist result:", playlistRes);
     if (!playlistRes?.success) {
       return res
         .status(500)
@@ -193,7 +194,7 @@ export const createShufflePlaylist = async (req, res) => {
 
     const playlistTracks = playlistRes.data?.tracks || [];
 
-    // 2. Fetch user history
+    // 2. Fetch history
     const historyRes = await executeYTMusicFunction(req, res, "get_history");
     if (!historyRes?.success) {
       return res
@@ -201,37 +202,63 @@ export const createShufflePlaylist = async (req, res) => {
         .json({ error: historyRes.error || "Failed to fetch history" });
     }
 
-    const historyVideoIds = new Set(
-      (historyRes.data || []).map((track) => track.videoId).filter(Boolean)
+    const historyTracks = historyRes.data || [];
+    const recentlyPlayedSet = new Set();
+
+    historyTracks.forEach((track) => {
+      if (!track?.videoId || !track?.played) return;
+    });
+
+    const historyVideoIds = new Set(historyTracks.map((t) => t.videoId));
+
+    const _shuffle = (arr) => arr.sort(() => Math.random() - 0.5);
+
+    // 3. Filter out excluded and recently played tracks
+    let filteredTracks = playlistTracks.filter(
+      (track) =>
+        track.videoId &&
+        !excludedVideoIds.includes(track.videoId) &&
+        !recentlyPlayedSet.has(track.videoId)
     );
 
-    // 3. Shuffle logic
-    const unplayed = playlistTracks.filter(
-      (track) => !historyVideoIds.has(track.videoId)
-    );
-    const played = playlistTracks.filter((track) =>
-      historyVideoIds.has(track.videoId)
-    );
+    // 4. Advanced shuffle logic
+    let finalTrackList = [];
 
-    const _shuffle = (arr) => arr.sort(() => Math.random() - 0.5); // Quick shuffle
-    const shuffledVideoIds = [..._shuffle(unplayed), ...played]
+    if (prioritizeUnplayed) {
+      const unplayed = filteredTracks.filter(
+        (track) => !historyVideoIds.has(track.videoId)
+      );
+      const played = filteredTracks.filter((track) =>
+        historyVideoIds.has(track.videoId)
+      );
+
+      const shuffledUnplayed = _shuffle(unplayed);
+      const shuffledPlayed =
+        !skipRecentlyPlayedSongs && pushRecentlyPlayedToEnd
+          ? played
+          : _shuffle(played);
+
+      finalTrackList = [...shuffledUnplayed, ...shuffledPlayed];
+    } else {
+      finalTrackList = _shuffle(filteredTracks);
+    }
+
+    const shuffledVideoIds = finalTrackList
       .map((track) => track.videoId)
       .filter(Boolean);
 
-    // 4. Create the new shuffled playlist
+    // 5. Create the new shuffled playlist
     const createPlaylistResult = await executeYTMusicFunction(
       req,
       res,
       "create_playlist",
       [
-        title || `${playlistRes.data.title} - Shuffled`,
-        description || "Shuffled with unplayed first",
+        title || `${playlistRes.data.title} - Smart Shuffle`,
+        description || "Smart shuffled playlist",
         privacy_status,
         shuffledVideoIds,
       ]
     );
-
-    console.log("Create playlist result:", createPlaylistResult);
 
     if (!createPlaylistResult?.success) {
       return res.status(500).json({
@@ -241,7 +268,7 @@ export const createShufflePlaylist = async (req, res) => {
     }
 
     res.status(201).json({
-      message: "Shuffled playlist created successfully",
+      message: "Smart shuffled playlist created",
       playlistId: createPlaylistResult.data,
       totalTracks: shuffledVideoIds.length,
     });

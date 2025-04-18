@@ -18,11 +18,36 @@ import {
   FavoriteBorder as FavoriteBorderIcon,
   Search as SearchIcon,
 } from "@mui/icons-material";
+import ShufflePlaylistModal from "./ShufflePlaylistModal";
+import { createShufflePlaylist } from "../../api/playlistApi";
+import { useSnackbar } from "../../context/SnackbarContext";
+import { useNavigate } from "react-router-dom";
 
 // Playlist Header Component
 const PlaylistHeader = ({ isLoading, playlist, onPlayAll, onShare }) => {
+  const navigate = useNavigate();
   const theme = useTheme();
+  const { showSnackbar } = useSnackbar();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleShuffle = async (formData) => {
+    console.log("Shuffle form data:", formData);
+    try {
+      const res = await createShufflePlaylist(playlist.id, formData);
+      console.log("Shuffle playlist created:", res);
+
+      // Show success message using global snackbar
+      showSnackbar("Successfully signed in with Google!", "success");
+
+      // Redirect after a short delay
+      setTimeout(() => {
+        navigate(`/playlist/${res.playlistId}`, { replace: true });
+      }, 1000);
+    } catch (error) {
+      console.error("Error fetching playlist:", error);
+    }
+  };
 
   return (
     <Box sx={{ display: "flex", mb: 4 }}>
@@ -43,9 +68,8 @@ const PlaylistHeader = ({ isLoading, playlist, onPlayAll, onShare }) => {
             alignSelf: "center",
           }}
           image={
-            playlist?.thumbnails?.find(
-              (thumb) => thumb.height > 150
-            )?.url || "https://via.placeholder.com/200"
+            playlist?.thumbnails?.find((thumb) => thumb.height > 150)?.url ||
+            "https://via.placeholder.com/200"
           }
           alt={playlist?.title}
         />
@@ -114,6 +138,29 @@ const PlaylistHeader = ({ isLoading, playlist, onPlayAll, onShare }) => {
           >
             <ShareIcon />
           </IconButton>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<PlayArrowIcon />}
+            onClick={() => setOpen(true)}
+            sx={{
+              borderRadius: 28,
+              px: 3,
+              py: 1,
+              ml: 2,
+              textTransform: "none",
+              fontWeight: "bold",
+            }}
+          >
+            Shuffle
+          </Button>
+
+          <ShufflePlaylistModal
+            open={open}
+            onClose={() => setOpen(false)}
+            onSubmit={handleShuffle}
+            defaultTitle={playlist.title}
+          />
         </Box>
       </CardContent>
     </Box>

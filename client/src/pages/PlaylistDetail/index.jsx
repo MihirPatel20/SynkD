@@ -122,6 +122,19 @@ const PlaylistDetail = () => {
     ? tracks.find((item) => item.id === currentlyPlaying)
     : null;
 
+  if (isLoading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{

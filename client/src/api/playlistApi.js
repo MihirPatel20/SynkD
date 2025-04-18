@@ -19,3 +19,17 @@ export const getPlaylistDetailsWithTracks = async (playlistId) => {
     throw error;
   }
 };
+
+export const createShufflePlaylist = async (playlistId, formData) => {
+  console.log("Creating shuffle playlist with data:", formData);
+  try {
+    const response = await api.post("/playlists/shuffle", {
+      ...formData,
+      playlistId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating shuffle playlist:", error);
+    throw error;
+  }
+};

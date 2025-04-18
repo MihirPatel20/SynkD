@@ -65,7 +65,7 @@ const endpoints = {
         title: "Shuffled Playlist",
         description: "A playlist created via API",
         privacy_status: "PRIVATE",
-        playlistId: "PL2Wu6wXw0ACgVb0vI1eogO8N40zvJeTCK",
+        playlistId: "PL2Wu6wXw0ACh4FGBbMTWOBK9Nt5VAArk3",
       }),
     },
   ],

@@ -1,5 +1,15 @@
 import api from ".";
 
+export const getHomeFeedVideos = async () => {
+  try {
+    const response = await api.get(`/music/home`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching playlist details:", error);
+    throw error;
+  }
+};
+
 export const getPlayHistory = async () => {
   try {
     const response = await api.get(`/music/history`);
@@ -10,12 +20,4 @@ export const getPlayHistory = async () => {
   }
 };
 
-export const getHomeFeedVideos = async () => {
-  try {
-    const response = await api.get(`/music/home`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching playlist details:", error);
-    throw error;
-  }
-};
+
