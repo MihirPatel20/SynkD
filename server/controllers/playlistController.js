@@ -165,9 +165,7 @@ export const createShufflePlaylist = async (req, res) => {
       title,
       description = "",
       privacy_status = "PRIVATE",
-      prioritizeUnplayed = true,
-      skipRecentlyPlayedSongs,
-      pushRecentlyPlayedToEnd = false,
+      recentlyPlayedBehavior = "include", // "skip", "move_to_end", "include"
       excludedVideoIds = [],
     } = req.body;
 
@@ -198,6 +196,7 @@ export const createShufflePlaylist = async (req, res) => {
 
     // 2. Fetch history
     const historyRes = await executeYTMusicFunction(req, res, "get_history");
+
     if (!historyRes?.success) {
       return res
         .status(500)
@@ -205,42 +204,33 @@ export const createShufflePlaylist = async (req, res) => {
     }
 
     const historyTracks = historyRes.data || [];
-    const recentlyPlayedSet = new Set();
 
-    historyTracks.forEach((track) => {
-      if (!track?.videoId || !track?.played) return;
-    });
-
-    const historyVideoIds = new Set(historyTracks.map((t) => t.videoId));
+    const historyVideoIds = new Set(
+      historyTracks.filter((t) => t?.videoId).map((t) => t.videoId)
+    );
 
     const _shuffle = (arr) => arr.sort(() => Math.random() - 0.5);
 
-    // 3. Filter out excluded and recently played tracks
-    let filteredTracks = playlistTracks.filter(
-      (track) =>
-        track.videoId &&
-        !excludedVideoIds.includes(track.videoId) &&
-        !recentlyPlayedSet.has(track.videoId)
+    // 3. Filter out excluded tracks
+    const filteredTracks = playlistTracks.filter(
+      (track) => track.videoId && !excludedVideoIds.includes(track.videoId)
     );
 
-    // 4. Advanced shuffle logic
+    // 4. Apply recently played handling logic
     let finalTrackList = [];
 
-    if (prioritizeUnplayed) {
-      const unplayed = filteredTracks.filter(
-        (track) => !historyVideoIds.has(track.videoId)
+    if (recentlyPlayedBehavior === "skip") {
+      finalTrackList = _shuffle(
+        filteredTracks.filter((track) => !historyVideoIds.has(track.videoId))
       );
-      const played = filteredTracks.filter((track) =>
+    } else if (recentlyPlayedBehavior === "move_to_end") {
+      const recent = filteredTracks.filter((track) =>
         historyVideoIds.has(track.videoId)
       );
-
-      const shuffledUnplayed = _shuffle(unplayed);
-      const shuffledPlayed =
-        !skipRecentlyPlayedSongs && pushRecentlyPlayedToEnd
-          ? played
-          : _shuffle(played);
-
-      finalTrackList = [...shuffledUnplayed, ...shuffledPlayed];
+      const rest = filteredTracks.filter(
+        (track) => !historyVideoIds.has(track.videoId)
+      );
+      finalTrackList = [..._shuffle(rest), ...recent];
     } else {
       finalTrackList = _shuffle(filteredTracks);
     }
