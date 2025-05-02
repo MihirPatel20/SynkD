@@ -57,6 +57,15 @@ const endpoints = {
         videoIds: ["hHZqggIcTDU", "NWCG3MUDc0A", "D8X6XhKtUL0", "hUtBXoUzgaM"],
       }),
     },
+    {
+      method: "POST",
+      path: "/playlists/move-track",
+      description: "Create a new playlist",
+      body: JSON.stringify({
+        playlistId: "PL2Wu6wXw0ACg3GZc3haOTrWSZ3HpGEJyT",
+        title: "Test 2",
+      }),
+    },
 
     {
       method: "POST",
@@ -75,6 +84,15 @@ const endpoints = {
       description: "Reorder playlist tracks with random shuffling",
       body: JSON.stringify({
         playlistId: "PL2Wu6wXw0ACg3GZc3haOTrWSZ3HpGEJyT",
+      }),
+    },
+    {
+      method: "PATCH",
+      path: "youtube/playlist/reorder",
+      description: "Reorder playlist tracks with random shuffling",
+      body: JSON.stringify({
+        playlistId: "PL2Wu6wXw0ACg3GZc3haOTrWSZ3HpGEJyT",
+        videos: [{ videoId: "iTok4C0S7vk", position: 0 }],
       }),
     },
   ],

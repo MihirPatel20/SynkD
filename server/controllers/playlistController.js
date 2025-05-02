@@ -284,3 +284,43 @@ export const createShufflePlaylist = async (req, res) => {
     }
   }
 };
+
+// @desc    Move a playlist item to a new position
+// @route   POST /api/playlists/move
+// @access  Private
+// @param   {string} playlistId - The ID of the playlist
+export const movePlaylistItem = async (req, res) => {
+  try {
+    const { playlistId, title, itemToMoveId, itemBeforeId } = req.body;
+
+    if (!playlistId) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
+
+    const moveItemArg = itemBeforeId
+      ? [itemToMoveId, itemBeforeId]
+      : itemToMoveId; // a string if moving to end
+
+    console.log("Move item argument:", moveItemArg);
+
+    const result = await executeYTMusicFunction(
+      req,
+      res,
+      "edit_playlist",
+      [playlistId, title || null, null, null, moveItemArg || null] // fill `None` (null) for title/desc/privacy
+    );
+
+    if (result && result.success) {
+      res.json({ message: "Track moved successfully", data: result.data });
+    } else if (result) {
+      res.status(500).json({ error: result.error });
+    }
+  } catch (error) {
+    console.error("Error in movePlaylistItem controller:", error.message);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "An unexpected error occurred while moving the playlist item",
+      });
+    }
+  }
+};

@@ -31,7 +31,15 @@ const PlaylistDetail = () => {
         console.log("Playlist details:", playlistDetails);
         setPlaylist(playlistDetails);
 
-        setTracks(playlistDetails.tracks);
+        // Add position field to each track based on its index
+        const tracksWithPosition = playlistDetails.tracks.map(
+          (track, index) => ({
+            ...track,
+            position: index,
+          })
+        );
+
+        setTracks(tracksWithPosition);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching playlist:", error);
@@ -167,6 +175,7 @@ const PlaylistDetail = () => {
         <DragDropContext onDragEnd={handleDragEnd}>
           <TrackList
             isLoading={isLoading}
+            playlistId={playlist.id}
             tracks={filteredItems}
             currentlyPlaying={currentlyPlaying}
             onTogglePlay={togglePlay}

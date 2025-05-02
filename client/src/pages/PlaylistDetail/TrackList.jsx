@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Typography,
   Box,
@@ -13,6 +13,8 @@ import {
   useTheme,
   alpha,
   Skeleton,
+  Button,
+  CircularProgress,
 } from "@mui/material";
 import {
   PlayArrow as PlayArrowIcon,
@@ -20,6 +22,7 @@ import {
   DragIndicator as DragIndicatorIcon,
 } from "@mui/icons-material";
 import { Droppable, Draggable, DragDropContext } from "@hello-pangea/dnd";
+import api from "../../api";
 
 const SkeletonTrack = () => {
   return (
@@ -47,6 +50,7 @@ const SkeletonTrack = () => {
 };
 
 const TrackList = ({
+  playlistId,
   tracks,
   currentlyPlaying,
   onTogglePlay,
@@ -56,6 +60,55 @@ const TrackList = ({
   isLoading,
 }) => {
   const theme = useTheme();
+  const [orderedTracks, setOrderedTracks] = useState(tracks);
+
+  useEffect(() => {
+    setOrderedTracks(tracks);
+  }, [tracks]);
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const reordered = Array.from(orderedTracks);
+    const [moved] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, moved);
+
+    setOrderedTracks(reordered);
+  };
+
+  const handleUpdateOrder = async () => {
+    // Only include videos where position has changed
+    console.log("Updating order...");
+    const updatedVideos = orderedTracks
+      .map((item, index) => ({
+        ...item,
+        position: index,
+      }))
+      .filter((item, index) => {
+        const original = tracks.find((t) => t.videoId === item.videoId);
+        return original && original.position !== index;
+      });
+
+    console.log("Updated videos:", updatedVideos);
+
+    if (updatedVideos.length === 0) {
+      console.log("👌 No changes to update");
+      return;
+    }
+
+    try {
+      const res = await api.patch("youtube/playlist/reorder", {
+        playlistId,
+        videos: updatedVideos.map(({ videoId, position }) => ({
+          videoId,
+          position,
+        })),
+      });
+      console.log("✅ Update success:", res);
+    } catch (err) {
+      console.error("❌ Failed to update playlist:", err);
+    }
+  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -72,7 +125,11 @@ const TrackList = ({
     }
 
     return (
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Button variant="contained" onClick={handleUpdateOrder}>
+          Update Order
+        </Button>
+
         <Droppable droppableId="playlist-tracks">
           {(provided) => (
             <List
@@ -80,7 +137,7 @@ const TrackList = ({
               ref={provided.innerRef}
               sx={{ py: 0 }}
             >
-              {tracks.map((item, index) => (
+              {orderedTracks.map((item, index) => (
                 <Draggable
                   key={item.videoId + index}
                   draggableId={item.videoId + index}
