@@ -3,6 +3,7 @@ import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import SearchBar from "./SearchBar";
+import { LibraryMusic as LibraryIcon } from "@mui/icons-material";
 import LogoutButton from "../auth/LogoutButton";
 import UserProfileChip from "./UserProfileChip";
 
@@ -29,19 +30,21 @@ const Navbar = () => {
           <SearchBar />
         </Box>
 
-        <Button
+        {/* <Button
           component={RouterLink}
           to="/test"
           color="inherit"
           sx={{ textTransform: "none" }}
         >
           API console
-        </Button>
+        </Button> */}
+
         <Button
           component={RouterLink}
           to="/library"
           color="inherit"
           sx={{ textTransform: "none" }}
+          startIcon={<LibraryIcon />} // Add this line
         >
           Library
         </Button>

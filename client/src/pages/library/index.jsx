@@ -42,6 +42,7 @@ const Library = () => {
 
     return (
       <Card
+        variant="outlined"
         sx={{
           height: "100%",
           display: "flex",
@@ -77,7 +78,10 @@ const Library = () => {
   };
 
   const SkeletonCard = () => (
-    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Card
+      variant="outlined"
+      sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+    >
       <Skeleton variant="rectangular" height={200} animation="wave" />
       <CardContent sx={{ flexGrow: 1 }}>
         <Skeleton animation="wave" height={32} width="80%" sx={{ mb: 1 }} />
@@ -87,11 +91,11 @@ const Library = () => {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 1, mb: 4 }}>
       <Typography
         variant="h4"
         component="h1"
-        gutterBottom
+        mb={4}
         sx={{ fontWeight: "bold", color: theme.palette.primary.main }}
       >
         Your Library

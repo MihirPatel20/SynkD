@@ -10,7 +10,7 @@ import axios from "axios";
 
 const YouTubeSignInButton = ({
   buttonText = "Sign in with YouTube",
-  redirectPath = "/home",
+  redirectPath = "/library",
   onLoginSuccess,
 }) => {
   const navigate = useNavigate();

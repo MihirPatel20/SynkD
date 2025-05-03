@@ -126,9 +126,9 @@ const TrackList = ({
 
     return (
       <DragDropContext onDragEnd={handleDragEnd}>
-        <Button variant="contained" onClick={handleUpdateOrder}>
+        {/* <Button variant="contained" onClick={handleUpdateOrder}>
           Update Order
-        </Button>
+        </Button> */}
 
         <Droppable droppableId="playlist-tracks">
           {(provided) => (
@@ -169,7 +169,12 @@ const TrackList = ({
                           >
                             <Box
                               {...provided.dragHandleProps}
-                              sx={{ mr: 1, color: "text.secondary" }}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                mr: 1,
+                                color: "text.secondary",
+                              }}
                             >
                               <DragIndicatorIcon fontSize="small" />
                             </Box>
