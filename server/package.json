@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "render-postbuild": "./install.sh && npm install && npm install --prefix ../client --include=dev && npm run build --prefix ../client"
+    "render-postbuild": "../install.sh && npm install && npm install --prefix ../client --include=dev && npm run build --prefix ../client"
   },
   "keywords": [
     "youtube",
