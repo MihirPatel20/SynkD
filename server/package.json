@@ -5,8 +5,9 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon -r dotenv/config server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build-client": "cd ../client && npm install && npm run build"
   },
   "keywords": [
     "youtube",

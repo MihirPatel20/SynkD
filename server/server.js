@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
 import connectDB from "./config/db.js";
 import errorHandler from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.js";
@@ -12,13 +15,13 @@ import reportsRoutes from "./routes/reports.js";
 // Load environment variables
 dotenv.config();
 
-// Initialize express app
+// Init express app
 const app = express();
 
-// Connect to MongoDB
+// Connect to DB
 connectDB();
 
-// Middleware
+// Middlewares
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -27,20 +30,30 @@ app.use(
 );
 app.use(express.json());
 
-// Routes
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/music", musicRoutes);
 app.use("/api/playlists", playlistRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/youtube", youtubeRoutes);
 
-// Error handler middleware
+// Serve React frontend (production build)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const clientBuildPath = path.join(__dirname, "../client/dist");
+app.use(express.static(clientBuildPath));
+
+// Serve React index.html for any unmatched route (for React Router)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(clientBuildPath, "index.html"));
+});
+
+// Error handler (should be after all routes)
 app.use(errorHandler);
 
-// Define port
-const PORT = process.env.PORT || 5000;
-
 // Start server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
