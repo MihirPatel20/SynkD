@@ -21,7 +21,7 @@ const app = express();
 // Connect to DB
 connectDB();
 
-// Middlewares
+// Middleware
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -37,19 +37,20 @@ app.use("/api/playlists", playlistRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/youtube", youtubeRoutes);
 
-// Serve React frontend (production build)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Serve React frontend in production
+if (process.env.NODE_ENV === "production") {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const clientBuildPath = path.join(__dirname, "../client/dist");
 
-const clientBuildPath = path.join(__dirname, "../client/dist");
-app.use(express.static(clientBuildPath));
+  app.use(express.static(clientBuildPath));
 
-// Serve React index.html for any unmatched route (for React Router)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(clientBuildPath, "index.html"));
-});
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(clientBuildPath, "index.html"));
+  });
+}
 
-// Error handler (should be after all routes)
+// Error handler (after all routes)
 app.use(errorHandler);
 
 // Start server

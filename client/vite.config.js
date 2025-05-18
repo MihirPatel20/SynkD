@@ -11,4 +11,7 @@ export default defineConfig({
     host: true, // allows external devices to access the server
     port: 3000,
   },
+  build: {
+    outDir: "dist", // this is default, just for clarity
+  },
 });
