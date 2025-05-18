@@ -8,4 +8,4 @@ then
 fi
 
 # install Python dependencies
-pip3 install -r server/scripts/requirements.txt
+pip3 install -r scripts/requirements.txt
